@@ -159,7 +159,7 @@ const Edit = new WizardScene(
                 await ctx.sendMessage(
                     ctx.session.messages.wishlist.edit.scenes.title.replace(
                         '%1',
-                        textLimits.TITLE
+                        textLimits[textLimitTypes.TITLE]
                     ),
                     Markup.removeKeyboard()
                 );
@@ -170,7 +170,7 @@ const Edit = new WizardScene(
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.scenes.updateDescription.replace(
                             '%1',
-                            textLimits.DESCRIPTION
+                            textLimits[textLimitTypes.DESCRIPTION]
                         ),
                         Markup.keyboard([
                             Markup.button.text(
@@ -182,7 +182,7 @@ const Edit = new WizardScene(
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.scenes.addDescription.replace(
                             '%1',
-                            textLimits.DESCRIPTION
+                            textLimits[textLimitTypes.DESCRIPTION]
                         ),
                         Markup.removeKeyboard()
                     );
@@ -262,7 +262,7 @@ const Edit = new WizardScene(
                 if (
                     !textAnswer ||
                     !trim(textAnswer) ||
-                    trim(textAnswer).length > textLimits.TITLE
+                    trim(textAnswer).length > textLimits[textLimitTypes.TITLE]
                 ) {
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.errors.title +
@@ -287,7 +287,7 @@ const Edit = new WizardScene(
                 if (
                     !textAnswer ||
                     !trim(textAnswer) ||
-                    trim(textAnswer).length > textLimits.DESCRIPTION
+                    trim(textAnswer).length > textLimits[textLimitTypes.DESCRIPTION]
                 ) {
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.errors.description +
