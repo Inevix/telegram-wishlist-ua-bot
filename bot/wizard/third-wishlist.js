@@ -15,7 +15,7 @@ const { GIVE, TAKE } = {
     TAKE: 'take_'
 };
 
-const stepHandler = getComplexStepHandler([GREETING]);
+const stepHandler = getComplexStepHandler([GREETING, FIND_LIST]);
 
 const getExistingWishInGiveList = async (ctx, wishId) => {
     if (!wishId) {
