@@ -17,6 +17,7 @@ jobs:
           key: ${{secrets.SSH_PRIVATE_KEY}}
           inventory: ${{secrets.INVENTORY}}
           options: |
+            -e RELEASE=${{github.ref_name}}
             -e NODE_ENV=production
             -e VPS_USER=${{secrets.VPS_USER}}
             -e VPS_APP_PATH=${{secrets.VPS_APP_PATH}}

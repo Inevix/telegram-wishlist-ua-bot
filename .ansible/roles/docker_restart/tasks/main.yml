@@ -5,7 +5,7 @@
     force_source: yes
     source: build
     build:
-      path: "{{ VPS_APP_PATH }}"
+      path: "{{VPS_APP_PATH}}"
       dockerfile: ./.docker/Dockerfile
 
 - name: Restart Wishlist Bot container on VPS
@@ -16,9 +16,9 @@
     recreate: yes
     network_mode: "host"
     env:
-      NODE_ENV: "{{ NODE_ENV }}"
-      BOT_TOKEN: "{{ BOT_TOKEN }}"
-      MONGODB_URI: "{{ MONGODB_URI }}"
-      ADMIN_TELEGRAM_ID: "{{ ADMIN_TELEGRAM_ID }}"
-      GITHUB_REPO_URL: "{{ GITHUB_REPO_URL }}"
-      PRINCESS_BOT_URL: "{{ PRINCESS_BOT_URL }}"
+      NODE_ENV: "{{NODE_ENV}}"
+      BOT_TOKEN: "{{BOT_TOKEN}}"
+      MONGODB_URI: "{{MONGODB_URI}}"
+      ADMIN_TELEGRAM_ID: "{{ADMIN_TELEGRAM_ID}}"
+      GITHUB_REPO_URL: "{{GITHUB_REPO_URL}}"
+      PRINCESS_BOT_URL: "{{PRINCESS_BOT_URL}}"

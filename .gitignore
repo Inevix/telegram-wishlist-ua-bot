@@ -23,8 +23,6 @@
 !/.ansible/roles/git_pull/tasks/main.yml
 !/bot
 !/bot/*.js
-!/bot/commands
-!/bot/commands/*.js
 !/bot/helpers
 !/bot/helpers/*.js
 !/bot/i18n
