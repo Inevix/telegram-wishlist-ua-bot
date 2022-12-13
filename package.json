@@ -1,0 +1,32 @@
+{
+    "name": "wishlist",
+    "version": "1.0.0",
+    "description": "Telegram bot that allows everybody to create and update their own wish list for whole time",
+    "main": "index.js",
+    "author": "inevix",
+    "license": "MIT",
+    "scripts": {
+        "start": "node bot/index.js",
+        "docker:start": "docker compose -f .docker/docker-compose.prod.yml up --force-recreate --build -d",
+        "docker:stop": "docker compose -f .docker/docker-compose.prod.yml down",
+        "dev:start": "NODE_ENV=dev nodemon bot/index.js",
+        "dev:docker:start": "docker compose -f .docker/docker-compose.dev.yml up --force-recreate --build -d",
+        "dev:docker:stop": "docker compose -f .docker/docker-compose.dev.yml down",
+        "dev:mac:docker:start": "docker compose -f .docker/docker-compose.dev.mac.yml up --force-recreate --build -d",
+        "dev:mac:docker:stop": "docker compose -f .docker/docker-compose.dev.mac.yml down"
+    },
+    "dependencies": {
+        "dotenv": "^16.0.3",
+        "mongoose": "^6.7.5",
+        "telegraf": "^4.11.2"
+    },
+    "devDependencies": {
+        "@homer0/prettier-plugin-jsdoc": "^5.1.5",
+        "eslint": "^8.29.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-json": "^3.1.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "nodemon": "^2.0.20",
+        "prettier": "^2.8.0"
+    }
+}

@@ -1,0 +1,24 @@
+- name: Build Wishlist Bot image on VPS
+  docker_image:
+    name: wishlist_bot_image
+    state: present
+    force_source: yes
+    source: build
+    build:
+      path: "{{ VPS_APP_PATH }}"
+      dockerfile: ./.docker/Dockerfile
+
+- name: Restart Wishlist Bot container on VPS
+  docker_container:
+    name: wishlist_bot
+    image: wishlist_bot_image
+    restart: yes
+    recreate: yes
+    network_mode: "host"
+    env:
+      NODE_ENV: "{{ NODE_ENV }}"
+      BOT_TOKEN: "{{ BOT_TOKEN }}"
+      MONGODB_URI: "{{ MONGODB_URI }}"
+      ADMIN_TELEGRAM_ID: "{{ ADMIN_TELEGRAM_ID }}"
+      GITHUB_REPO_URL: "{{ GITHUB_REPO_URL }}"
+      PRINCESS_BOT_URL: "{{ PRINCESS_BOT_URL }}"
