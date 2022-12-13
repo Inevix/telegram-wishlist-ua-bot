@@ -106,7 +106,7 @@ const Edit = new WizardScene(
                         IMAGES
                     ),
                     Markup.button.callback(
-                        wish.description
+                        wish.link
                             ? ctx.session.messages.wishlist.edit.actions
                                   .updateLink
                             : ctx.session.messages.wishlist.edit.actions
