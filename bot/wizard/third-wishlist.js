@@ -58,7 +58,7 @@ stepHandler.action(new RegExp(GIVE), async ctx => {
 
     if (existingInWishList) {
         await ctx.replyWithMarkdown(
-            ctx.session.messages.findList.errors.exist +
+            ctx.session.messages.findList.errors.give +
                 ctx.session.messages.findList.back,
             Markup.removeKeyboard()
         );
@@ -141,16 +141,15 @@ const ThirdWishlist = new WizardScene(
             return await setTimer(ctx, FIND_LIST);
         }
 
-        // Todo: restore before go live
-        // if (user._id.toString() === ctx.session.user._id.toString()) {
-        //     await ctx.sendMessage(
-        //         ctx.session.messages.findList.errors.foundYourself +
-        //             ctx.session.messages.findList.back,
-        //         Markup.removeKeyboard()
-        //     );
-        //
-        //     return await setTimer(ctx, FIND_LIST);
-        // }
+        if (user._id.toString() === ctx.session.user._id.toString()) {
+            await ctx.sendMessage(
+                ctx.session.messages.findList.errors.foundYourself +
+                    ctx.session.messages.findList.back,
+                Markup.removeKeyboard()
+            );
+
+            return await setTimer(ctx, FIND_LIST);
+        }
 
         const wishlist = await Wish.find({
             userId: user._id
@@ -161,7 +160,7 @@ const ThirdWishlist = new WizardScene(
 
         if (!wishlist.length) {
             await ctx.sendMessage(
-                ctx.session.messages.findList.errors.empty,
+                ctx.session.messages.findList.empty,
                 Markup.removeKeyboard()
             );
 
