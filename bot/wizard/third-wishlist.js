@@ -126,10 +126,17 @@ const ThirdWishlist = new WizardScene(
 
         const username = ctx.session.thirdWishlist.replace(/@/g, '');
         const phone = ctx.session.thirdWishlist.replace(/\D/g, '');
+        const searchCriteria =
+            phone && phone.length > 9
+                ? {
+                      $or: [
+                          { username },
+                          { phone: { $regex: new RegExp(phone) } }
+                      ]
+                  }
+                : { username };
 
-        const user = await User.findOne({
-            $or: [{ username }, { phone: { $regex: new RegExp(phone) } }]
-        });
+        const user = await User.findOne(searchCriteria);
 
         if (!user) {
             await ctx.sendMessage(

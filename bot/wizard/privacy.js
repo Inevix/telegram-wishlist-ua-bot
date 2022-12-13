@@ -40,7 +40,6 @@ const Privacy = new WizardScene(
             );
         }
 
-        // Todo: complete description
         await ctx.replyWithMarkdown(
             ctx.session.messages.privacy.description.sensitive +
                 ctx.session.messages.privacy.description.openSource +
