@@ -5,6 +5,7 @@ module.exports = [
     require('./wishlist'),
     require('./wishlist/add'),
     require('./wishlist/edit'),
+    require('./wishlist/remove'),
     require('./find'),
     require('./third-wishlist'),
     require('./give-list'),
