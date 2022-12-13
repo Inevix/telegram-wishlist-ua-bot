@@ -6,6 +6,7 @@ const Wish = require('../../models/wish');
 const trim = require('../../helpers/trim');
 const removeKeyboard = require('../../helpers/remove-keyboard');
 const { setTimer } = require('../../helpers/timer');
+const { textLimits } = require('../../helpers/cut-text');
 const { GREETING, WISHLIST, WISHLIST_ADD, WISHLIST_EDIT } = require('../types');
 const { BACK } = {
     BACK: 'back'
@@ -15,7 +16,10 @@ const Add = new WizardScene(
     WISHLIST_ADD,
     async ctx => {
         await ctx.sendMessage(
-            ctx.session.messages.wishlist.add.description,
+            ctx.session.messages.wishlist.add.description.replace(
+                '%1',
+                textLimits.TITLE
+            ),
             Markup.inlineKeyboard(
                 [
                     Markup.button.callback(
@@ -47,7 +51,12 @@ const Add = new WizardScene(
             );
         }
 
-        if (!message || (message && !trim(message))) {
+        if (
+            !message ||
+            (message &&
+                !trim(message) &&
+                trim(message).length > textLimits.TITLE)
+        ) {
             await ctx.sendMessage(
                 ctx.session.messages.wishlist.add.error,
                 Markup.removeKeyboard()

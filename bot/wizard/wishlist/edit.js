@@ -7,6 +7,11 @@ const trim = require('../../helpers/trim');
 const getWishMarkup = require('../../helpers/wish-markup');
 const getMediaGroup = require('../../helpers/media-group');
 const { resetTimer, setTimer } = require('../../helpers/timer');
+const {
+    getCutText,
+    textLimits,
+    textLimitTypes
+} = require('../../helpers/cut-text');
 const { WISHLIST_EDIT, WISHLIST, GREETING } = require('../types');
 const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, BACK } = {
     TITLE: 'title',
@@ -152,7 +157,10 @@ const Edit = new WizardScene(
         switch (callback) {
             case TITLE:
                 await ctx.sendMessage(
-                    ctx.session.messages.wishlist.edit.scenes.title,
+                    ctx.session.messages.wishlist.edit.scenes.title.replace(
+                        '%1',
+                        textLimits.TITLE
+                    ),
                     Markup.removeKeyboard()
                 );
 
@@ -160,8 +168,10 @@ const Edit = new WizardScene(
             case DESCRIPTION:
                 if (ctx.scene.session.wish.description) {
                     await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes
-                            .updateDescription,
+                        ctx.session.messages.wishlist.edit.scenes.updateDescription.replace(
+                            '%1',
+                            textLimits.DESCRIPTION
+                        ),
                         Markup.keyboard([
                             Markup.button.text(
                                 ctx.session.messages.actions.remove
@@ -170,8 +180,10 @@ const Edit = new WizardScene(
                     );
                 } else {
                     await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes
-                            .addDescription,
+                        ctx.session.messages.wishlist.edit.scenes.addDescription.replace(
+                            '%1',
+                            textLimits.DESCRIPTION
+                        ),
                         Markup.removeKeyboard()
                     );
                 }
@@ -247,7 +259,11 @@ const Edit = new WizardScene(
 
         switch (ctx.scene.session.callback) {
             case TITLE:
-                if (!textAnswer || !trim(textAnswer)) {
+                if (
+                    !textAnswer ||
+                    !trim(textAnswer) ||
+                    trim(textAnswer).length > textLimits.TITLE
+                ) {
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.errors.title +
                             ctx.session.messages.wishlist.edit.back,
@@ -258,7 +274,7 @@ const Edit = new WizardScene(
                 }
 
                 await ctx.scene.session.wish.updateOne({
-                    title: textAnswer
+                    title: getCutText(textAnswer)
                 });
                 await ctx.sendMessage(
                     ctx.session.messages.wishlist.edit.success.title +
@@ -268,7 +284,11 @@ const Edit = new WizardScene(
 
                 return await setTimer(ctx, WISHLIST_EDIT);
             case DESCRIPTION:
-                if (!textAnswer || !trim(textAnswer)) {
+                if (
+                    !textAnswer ||
+                    !trim(textAnswer) ||
+                    trim(textAnswer).length > textLimits.DESCRIPTION
+                ) {
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.errors.description +
                             ctx.session.messages.wishlist.edit.back,
@@ -282,7 +302,7 @@ const Edit = new WizardScene(
                     description:
                         textAnswer === ctx.session.messages.actions.remove
                             ? null
-                            : textAnswer
+                            : getCutText(textAnswer, textLimitTypes.DESCRIPTION)
                 });
                 await ctx.sendMessage(
                     (textAnswer === ctx.session.messages.actions.remove

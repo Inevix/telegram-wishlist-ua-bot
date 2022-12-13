@@ -1,4 +1,5 @@
 const getDate = require('./date');
+const { getCutText, textLimitTypes } = require('./cut-text');
 
 module.exports = async (ctx, wish, owner = true) => {
     if (!wish) return '';
@@ -7,10 +8,13 @@ module.exports = async (ctx, wish, owner = true) => {
     const updated = getDate(ctx, wish.updatedAt);
     const showEditDate = created !== updated;
 
-    const title = `❤️ *${wish.title}*`;
+    const title = `❤️ *${getCutText(wish.title)}*`;
     let priority = '';
     const description = wish.description
-        ? `\n\n✏️ Опис:\n${wish.description}`
+        ? `\n\n✏️ Опис:\n${getCutText(
+              wish.description,
+              textLimitTypes.DESCRIPTION
+          )}`
         : '';
     const editDate = showEditDate ? `\n🗓 _Оновлено: ${updated}_` : '';
     const createdDate = `\n\n🗓 _Створено: ${created}_`;
