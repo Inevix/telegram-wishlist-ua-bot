@@ -1,19 +1,17 @@
 {
     "name": "wishlist",
-    "version": "1.0.0",
+    "version": "1.0.8",
     "description": "Telegram bot that allows everybody to create and update their own wish list for whole time",
     "main": "index.js",
     "author": "inevix",
     "license": "MIT",
     "scripts": {
         "start": "node bot/index.js",
-        "docker:start": "docker compose -f .docker/docker-compose.prod.yml up --force-recreate --build -d",
-        "docker:stop": "docker compose -f .docker/docker-compose.prod.yml down",
-        "dev:start": "NODE_ENV=dev nodemon bot/index.js",
-        "dev:docker:start": "docker compose -f .docker/docker-compose.dev.yml up --force-recreate --build -d",
-        "dev:docker:stop": "docker compose -f .docker/docker-compose.dev.yml down",
-        "dev:mac:docker:start": "docker compose -f .docker/docker-compose.dev.mac.yml up --force-recreate --build -d",
-        "dev:mac:docker:stop": "docker compose -f .docker/docker-compose.dev.mac.yml down"
+        "docker:start": "NODE_ENV=production docker compose -f .docker/docker-compose.yml up --force-recreate --build -d",
+        "docker:stop": "NODE_ENV=production docker compose -f .docker/docker-compose.yml down",
+        "docker:restart": "npm run docker:stop && npm run docker:start",
+        "dev": "nodemon bot/index.js",
+        "docker:dev": "NODE_ENV=dev docker compose -f .docker/docker-compose.yml up --force-recreate --build"
     },
     "dependencies": {
         "dotenv": "^16.0.3",

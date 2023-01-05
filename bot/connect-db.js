@@ -1,14 +1,7 @@
 const { join } = require('path');
-const { NODE_ENV } = process.env;
-
-let envPath = '.env';
-
-if (NODE_ENV === 'dev') {
-    envPath = `${envPath}.${NODE_ENV}`;
-}
 
 require('dotenv').config({
-    path: join(__dirname, '..', 'env', envPath)
+    path: join(__dirname, '..', 'env', '.env')
 });
 
 const mongoose = require('mongoose');

@@ -6,6 +6,6 @@ WORKDIR /wishlist
 COPY ./package.json ./
 COPY ./bot ./bot/
 
-RUN npm i --production
+RUN npm i --omit=dev
 
 CMD ["npm", "start"]

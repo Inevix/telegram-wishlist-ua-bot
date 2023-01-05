@@ -6,7 +6,7 @@
     source: build
     build:
       path: "{{VPS_APP_PATH}}"
-      dockerfile: ./.docker/Dockerfile
+      dockerfile: "./.docker/{{NODE_ENV}}.dockerfile"
 
 - name: Restart Wishlist Bot container on VPS
   docker_container:
