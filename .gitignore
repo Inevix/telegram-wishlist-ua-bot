@@ -4,6 +4,7 @@
 !/.github/workflows
 !/.github/workflows/main.yml
 !LICENSE
+!README.md
 !.eslintrc.js
 !.prettierrc.js
 !package.json
@@ -35,3 +36,5 @@
 !/bot/wizard/*.js
 !/bot/wizard/wishlist
 !/bot/wizard/wishlist/*.js
+!/.backups
+!/.backups/.gitkeep

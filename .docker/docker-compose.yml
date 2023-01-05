@@ -9,7 +9,7 @@ services:
         ports:
             - "27027:27017"
         volumes:
-            - ../.mongo_${NODE_ENV}:/data/db
+            - ../.mongo/${NODE_ENV}:/data/db
         environment:
             - MONGO_INITDB_DATABASE=wishlist_${NODE_ENV}
         command: mongod --quiet --logpath /dev/null
@@ -26,7 +26,7 @@ services:
             dockerfile: ./.docker/${NODE_ENV}.dockerfile
         volumes:
             - ../bot:/wishlist/bot
-        env_file: ../env/.env
+        env_file: ../env/.env.${NODE_ENV}
         environment:
             - NODE_ENV=${NODE_ENV}
             - MONGODB_URI=mongodb://db:27017/wishlist_${NODE_ENV}
