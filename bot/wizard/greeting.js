@@ -15,6 +15,10 @@ const {
     FIND_LIST,
     FEEDBACK
 } = require('../wizard/types');
+const removeKeyboard = require('../helpers/remove-keyboard');
+const { TOGGLE_GREETING } = {
+    TOGGLE_GREETING: 'toggle_greeting'
+};
 
 const stepHandler = getComplexStepHandler([
     PRIVACY,
@@ -24,6 +28,16 @@ const stepHandler = getComplexStepHandler([
     FIND_LIST,
     FEEDBACK
 ]);
+
+stepHandler.action(TOGGLE_GREETING, async ctx => {
+    await removeKeyboard(ctx);
+
+    await ctx.session.user.updateOne({
+        hideGreeting: !ctx.session.user.hideGreeting
+    });
+
+    await ctx.scene.enter(GREETING);
+});
 
 const Greeting = new WizardScene(
     GREETING,
@@ -55,10 +69,12 @@ const Greeting = new WizardScene(
         const telegramId = ctx.session.telegramId ?? messageId;
         const user = await User.findOne({ telegramId });
 
-        await ctx.replyWithMarkdown(
-            ctx.session.messages.greeting.general,
-            Markup.removeKeyboard()
-        );
+        if (!user?.hideGreeting) {
+            await ctx.replyWithMarkdown(
+                ctx.session.messages.greeting.general,
+                Markup.removeKeyboard()
+            );
+        }
 
         if (!user) {
             await ctx.replyWithMarkdown(
@@ -100,8 +116,14 @@ const Greeting = new WizardScene(
             ctx.session.user = await User.findById(user._id);
         }
 
+        const greetingAction = user.hideGreeting
+            ? ctx.session.messages.greeting.actions.show
+            : ctx.session.messages.greeting.actions.hide;
+
         await ctx.replyWithMarkdown(
-            ctx.session.messages.greeting.user,
+            user.hideGreeting
+                ? ctx.session.messages.greeting.hidden
+                : ctx.session.messages.greeting.user,
             Markup.inlineKeyboard(
                 [
                     Markup.button.callback(
@@ -116,6 +138,7 @@ const Greeting = new WizardScene(
                         ctx.session.messages.findList.title,
                         FIND_LIST
                     ),
+                    Markup.button.callback(greetingAction, TOGGLE_GREETING),
                     Markup.button.callback(
                         ctx.session.messages.privacy.title,
                         PRIVACY

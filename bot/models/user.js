@@ -17,7 +17,11 @@ const userSchema = new Schema({
         unique: true,
         sparse: true
     },
-    language: String
+    language: String,
+    hideGreeting: {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = model('User', userSchema);
