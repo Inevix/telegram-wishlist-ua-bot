@@ -358,9 +358,9 @@ Before go next steps, you have to install NPM packages to your local machine too
 Перед тим, як рухатися далі, ти маєш встановити NPM пакети локально також.
 
 If you don't have Node.js locally, please visit the [site](https://nodejs.org/en/).<br/>
-Якщо в тебе не має Node.js локально, відвідай цей [сайт](https://nodejs.org/uk/).
+Якщо в тебе немає Node.js локально, відвідай цей [сайт](https://nodejs.org/uk/).
 
-Next just install NPM packages to the project directory/<br/>
+Next just install NPM packages to the project directory.<br/>
 Далі просто встанови NPM пакети в директорію проєкту.
 ```shell
 npm i
