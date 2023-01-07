@@ -352,6 +352,20 @@ npm run docker:dev
 Next feel free to edit any files in the `bot` directory.<br/>
 Далі зміни будь який файл в директорії `bot`.
 
+### Local NPM packages<br/>Локальні NPM пакети
+
+Before go next steps, you have to install NPM packages to your local machine too.<br/>
+Перед тим, як рухатися далі, ти маєш встановити NPM пакети локально також.
+
+If you don't have Node.js locally, please visit the [site](https://nodejs.org/en/).<br/>
+Якщо в тебе не має Node.js локально, відвідай цей [сайт](https://nodejs.org/uk/).
+
+Next just install NPM packages to the project directory/<br/>
+Далі просто встанови NPM пакети в директорію проєкту.
+```shell
+npm i
+```
+
 ### Code inspecting<br/>Перевірка коду
 
 There is the `.eslintrc.js` file in the project to present rules for [ESLint](https://eslint.org/).<br/>
