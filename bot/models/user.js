@@ -17,7 +17,13 @@ const userSchema = new Schema({
         unique: true,
         sparse: true
     },
-    language: String,
+    language: {
+        code: String,
+        auto: {
+            type: Boolean,
+            default: true
+        }
+    },
     hideGreeting: {
         type: Boolean,
         default: false

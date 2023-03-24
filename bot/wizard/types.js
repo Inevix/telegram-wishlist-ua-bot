@@ -9,5 +9,6 @@ module.exports = {
     FIND_LIST: 'find_list',
     THIRD_WISHLIST: 'third_wishlist',
     GIVE_LIST: 'give_list',
-    FEEDBACK: 'feedback'
+    FEEDBACK: 'feedback',
+    LANGUAGE: 'language'
 };

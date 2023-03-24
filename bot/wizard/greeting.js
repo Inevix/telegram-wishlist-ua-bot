@@ -5,7 +5,7 @@ const {
 const User = require('../models/user');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
 const { setTimer } = require('../helpers/timer');
-const getMessages = require('../i18n/messages');
+const setSessionLanguage = require('../helpers/language');
 const {
     GREETING,
     PRIVACY,
@@ -13,7 +13,8 @@ const {
     WISHLIST,
     GIVE_LIST,
     FIND_LIST,
-    FEEDBACK
+    FEEDBACK,
+    LANGUAGE
 } = require('../wizard/types');
 const removeKeyboard = require('../helpers/remove-keyboard');
 const { TOGGLE_GREETING } = {
@@ -26,7 +27,8 @@ const stepHandler = getComplexStepHandler([
     WISHLIST,
     GIVE_LIST,
     FIND_LIST,
-    FEEDBACK
+    FEEDBACK,
+    LANGUAGE
 ]);
 
 stepHandler.action(TOGGLE_GREETING, async ctx => {
@@ -58,16 +60,10 @@ const Greeting = new WizardScene(
             ctx.session.telegramId = messageId;
         }
 
-        if (messageLang && !sessionLang) {
-            // Todo: add translations
-            // ctx.session.lang = messageLang;
-            ctx.session.lang = 'uk';
-        }
-
-        ctx.session.messages = getMessages(ctx.session.lang);
-
         const telegramId = ctx.session.telegramId ?? messageId;
         const user = await User.findOne({ telegramId });
+
+        await setSessionLanguage(ctx, messageLang, user);
 
         if (!user?.hideGreeting) {
             await ctx.replyWithMarkdown(
@@ -75,6 +71,19 @@ const Greeting = new WizardScene(
                 Markup.removeKeyboard()
             );
         }
+
+        const buttonPrivacy = Markup.button.callback(
+            ctx.session.messages.privacy.title,
+            PRIVACY
+        );
+        const buttonFeedback = Markup.button.callback(
+            ctx.session.messages.feedback.title,
+            FEEDBACK
+        );
+        const buttonLanguage = Markup.button.callback(
+            ctx.session.messages.language.title,
+            LANGUAGE
+        );
 
         if (!user) {
             await ctx.replyWithMarkdown(
@@ -85,14 +94,9 @@ const Greeting = new WizardScene(
                             ctx.session.messages.auth.title,
                             AUTH
                         ),
-                        Markup.button.callback(
-                            ctx.session.messages.privacy.title,
-                            PRIVACY
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.feedback.title,
-                            FEEDBACK
-                        )
+                        buttonPrivacy,
+                        buttonFeedback,
+                        buttonLanguage
                     ],
                     {
                         columns: 1
@@ -139,14 +143,9 @@ const Greeting = new WizardScene(
                         FIND_LIST
                     ),
                     Markup.button.callback(greetingAction, TOGGLE_GREETING),
-                    Markup.button.callback(
-                        ctx.session.messages.privacy.title,
-                        PRIVACY
-                    ),
-                    Markup.button.callback(
-                        ctx.session.messages.feedback.title,
-                        FEEDBACK
-                    )
+                    buttonPrivacy,
+                    buttonFeedback,
+                    buttonLanguage
                 ],
                 {
                     columns: 1

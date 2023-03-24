@@ -1,0 +1,12 @@
+{
+    "language": {
+        "title": "\uD83C\uDDFA\uD83C\uDDE6 UA | \uD83C\uDDFA\uD83C\uDDF8 EN | \uD83C\uDDF5\uD83C\uDDF1 PL",
+        "description": "\uD83C\uDDFA\uD83C\uDDE6 Змінити мову для інтерфейсу боту.\n\uD83C\uDDFA\uD83C\uDDF8 Change a language of the bot interface.\n\uD83C\uDDF5\uD83C\uDDF1 Todo: in polish\n\n\uD83C\uDFB2 Якщо обрати автоматичний режим, мова інтерфейсу боту буде така сама, як вказана в налаштуваннях Телеграму\n\uD83C\uDFB2 If you choose the auto mode, a language of bot interface will be the same as it set in Telegram preferences.\n\uD83C\uDFB2 Todo: in polish",
+        "options": {
+            "ua": "\uD83C\uDDFA\uD83C\uDDE6 Українська | Ukrainian | Ukraiński",
+            "en": "\uD83C\uDDFA\uD83C\uDDF8 Англійська | English | Angielski",
+            "pl": "\uD83C\uDDF5\uD83C\uDDF1 Польська | Polish | Polski",
+            "auto": "\uD83C\uDFB2 Автоматично | Auto | Automatyczno"
+        }
+    }
+}
