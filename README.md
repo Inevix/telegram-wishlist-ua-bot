@@ -19,7 +19,7 @@ Run the command in your terminal.<br/>
 
 ```shell
 cd /path/to/directory/with/projects
-git clone git@github.com:Inevix/wishlist.git
+git clone git@github.com:serhii-chernenko/wishlist.git
 cd wishlist
 ```
 
