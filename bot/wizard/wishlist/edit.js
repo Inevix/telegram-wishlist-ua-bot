@@ -12,7 +12,7 @@ const {
     textLimits,
     textLimitTypes
 } = require('../../helpers/cut-text');
-const { WISHLIST_EDIT, WISHLIST, GREETING } = require('../types');
+const { WISHLIST_EDIT, WISHLIST, GREETING, WISHLIST_ADD } = require('../types');
 const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, BACK } = {
     TITLE: 'title',
     DESCRIPTION: 'description',
@@ -120,6 +120,10 @@ const Edit = new WizardScene(
                             : ctx.session.messages.wishlist.edit.actions
                                   .setPriority,
                         PRIORITY
+                    ),
+                    Markup.button.callback(
+                        ctx.session.messages.wishlist.add.title,
+                        WISHLIST_ADD
                     ),
                     Markup.button.callback(
                         ctx.session.messages.actions.back,
@@ -287,7 +291,8 @@ const Edit = new WizardScene(
                 if (
                     !textAnswer ||
                     !trim(textAnswer) ||
-                    trim(textAnswer).length > textLimits[textLimitTypes.DESCRIPTION]
+                    trim(textAnswer).length >
+                        textLimits[textLimitTypes.DESCRIPTION]
                 ) {
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.errors.description +
