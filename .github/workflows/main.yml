@@ -2,28 +2,33 @@ name: Build Wishlist Bot on VPS
 
 on:
   push:
-    tags:
-      - '*'
+    branches: ['main']
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Run a build command
         uses: dawidd6/action-ansible-playbook@v2
         with:
-          playbook: main.yml
-          directory: ${{secrets.LOCAL_APP_PATH}}/.ansible
+          playbook: .ansible/main.yml
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          inventory: ${{secrets.INVENTORY}}
+          inventory: |
+            [all]
+            ${{ secrets.VPS }} address=localhost
           options: |
             -e RELEASE=${{github.ref_name}}
             -e NODE_ENV=production
-            -e VPS_USER=${{secrets.VPS_USER}}
-            -e VPS_APP_PATH=${{secrets.VPS_APP_PATH}}
+            -e VPS_APP_PATH=/home/admin/apps/wishlist
             -e GITHUB_REPO=${{github.repository}}
             -e BOT_TOKEN=${{secrets.BOT_TOKEN}}
             -e MONGODB_URI=${{secrets.MONGODB_URI}}
             -e ADMIN_TELEGRAM_ID=${{secrets.ADMIN_TELEGRAM_ID}}
             -e GITHUB_REPO_URL=https://github.com/${{github.repository}}
-            -e PRINCESS_BOT_URL=${{secrets.PRINCESS_BOT_URL}}
+            -e PRINCESS_BOT_URL=${{vars.PRINCESS_BOT_URL}}
