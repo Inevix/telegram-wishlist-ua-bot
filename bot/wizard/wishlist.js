@@ -114,7 +114,7 @@ const Wishlist = new WizardScene(
         );
 
         for await (const wish of wishlist) {
-            const markup = await getWishMarkup(ctx, wish);
+            const markup = await getWishMarkup(ctx, wish, true, true);
 
             if (!markup) continue;
 
@@ -129,35 +129,12 @@ const Wishlist = new WizardScene(
                 )
             ];
 
-            if (wish.link) {
-                buttons.push(
-                    Markup.button.url(
-                        ctx.session.messages.actions.open,
-                        wish.link
-                    )
-                );
-            }
-
-            if (wish.images.length > 1) {
-                await ctx.sendMediaGroup(getMediaGroup(wish.images));
-            } else if (wish.images.length === 1) {
-                await ctx.sendPhoto(wish.images[0], {
-                    caption: markup,
-                    parse_mode: 'Markdown',
-                    ...Markup.inlineKeyboard(buttons, {
-                        columns: 2
-                    })
-                });
-            }
-
-            if (wish.images.length !== 1) {
-                await ctx.replyWithMarkdown(
-                    markup,
-                    Markup.inlineKeyboard(buttons, {
-                        columns: 2
-                    })
-                );
-            }
+            await ctx.replyWithMarkdown(
+                markup,
+                Markup.inlineKeyboard(buttons, {
+                    columns: 2
+                })
+            );
         }
 
         await ctx.replyWithMarkdown(
