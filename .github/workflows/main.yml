@@ -2,8 +2,7 @@ name: Build Wishlist Bot on VPS
 
 on:
   push:
-    tags:
-      - '*'
+    branches: ['main']
 
 concurrency:
   group: ${{ github.ref }}
