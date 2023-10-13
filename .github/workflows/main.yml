@@ -25,7 +25,7 @@ jobs:
           options: |
             -e RELEASE=${{github.ref_name}}
             -e NODE_ENV=production
-            -e VPS_APP_PATH=/home/admin/apps/wishlist
+            -e VPS_APP_PATH=/home/inevix/apps/wishlist
             -e GITHUB_REPO=${{github.repository}}
             -e BOT_TOKEN=${{secrets.BOT_TOKEN}}
             -e MONGODB_URI=${{secrets.MONGODB_URI}}
