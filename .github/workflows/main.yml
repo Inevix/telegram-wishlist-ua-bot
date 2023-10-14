@@ -32,3 +32,4 @@ jobs:
             -e ADMIN_TELEGRAM_ID=${{secrets.ADMIN_TELEGRAM_ID}}
             -e GITHUB_REPO_URL=https://github.com/${{github.repository}}
             -e PRINCESS_BOT_URL=${{vars.PRINCESS_BOT_URL}}
+            -e ansible_port=${{ secrets.SSH_PORT }}
