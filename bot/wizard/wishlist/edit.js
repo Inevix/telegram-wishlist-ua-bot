@@ -241,6 +241,10 @@ const Edit = new WizardScene(
                 );
 
                 return await setTimer(ctx, WISHLIST_EDIT);
+            case WISHLIST_ADD:
+                delete ctx.session.wishToEdit;
+
+                return await ctx.scene.enter(WISHLIST_ADD);
             case BACK:
                 delete ctx.session.wishToEdit;
 

@@ -16,3 +16,4 @@
     update: yes
     single_branch: yes
     version: main
+    accept_newhostkey: true
