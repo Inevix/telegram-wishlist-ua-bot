@@ -1,5 +1,5 @@
 const resetTimer = async ctx => {
-    if (!ctx.scene.session?.timer) return this;
+    if (!ctx?.scene?.session?.timer) return this;
 
     clearTimeout(ctx.scene.session.timer);
 };
