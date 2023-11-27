@@ -4,7 +4,6 @@ const {
 } = require('telegraf');
 const User = require('../models/user');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
-const { setTimer } = require('../helpers/timer');
 const getMessages = require('../i18n/messages');
 const {
     GREETING,
@@ -13,7 +12,8 @@ const {
     WISHLIST,
     GIVE_LIST,
     FIND_LIST,
-    FEEDBACK
+    FEEDBACK,
+    DONATE
 } = require('../wizard/types');
 const removeKeyboard = require('../helpers/remove-keyboard');
 const { TOGGLE_GREETING } = {
@@ -26,7 +26,8 @@ const stepHandler = getComplexStepHandler([
     WISHLIST,
     GIVE_LIST,
     FIND_LIST,
-    FEEDBACK
+    FEEDBACK,
+    DONATE
 ]);
 
 stepHandler.action(TOGGLE_GREETING, async ctx => {
@@ -146,6 +147,10 @@ const Greeting = new WizardScene(
                     Markup.button.callback(
                         ctx.session.messages.feedback.title,
                         FEEDBACK
+                    ),
+                    Markup.button.callback(
+                        ctx.session.messages.donate.title,
+                        DONATE
                     )
                 ],
                 {

@@ -9,5 +9,6 @@ module.exports = [
     require('./find'),
     require('./third-wishlist'),
     require('./give-list'),
-    require('./feedback')
+    require('./feedback'),
+    require('./donate')
 ];

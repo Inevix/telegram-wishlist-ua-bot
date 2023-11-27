@@ -431,7 +431,10 @@ const Edit = new WizardScene(
                     link:
                         textAnswer === ctx.session.messages.actions.remove
                             ? null
-                            : textAnswer
+                            : textAnswer.replace(
+                                  new RegExp('.*?(http)', 's'),
+                                  '$1'
+                              )
                 });
                 await ctx.sendMessage(
                     (textAnswer === ctx.session.messages.actions.remove
