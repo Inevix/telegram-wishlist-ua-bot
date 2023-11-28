@@ -57,10 +57,12 @@ stepHandler.action(CLEAN, async ctx => {
 const GiveList = new WizardScene(
     GIVE_LIST,
     async ctx => {
-        await resetTimer(ctx);
+        let giveList;
 
         try {
-            const giveList = await Give.find({
+            await resetTimer(ctx);
+
+            giveList = await Give.find({
                 userId: ctx.session.user._id
             });
         } catch (e) {
