@@ -20,6 +20,9 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: CONTAINER_NAME
           script: |
+            echo "Saving container logs..."
+            docker logs "$CONTAINER_NAME"
+              
             CONTAINER_ID=$(docker ps --filter "name=$CONTAINER_NAME" --format="{{.ID}}")
             if [ -z "$CONTAINER_ID" ]
             then
