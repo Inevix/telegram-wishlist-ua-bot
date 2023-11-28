@@ -7,6 +7,7 @@ const trim = require('../../helpers/trim');
 const getWishMarkup = require('../../helpers/wish-markup');
 const getMediaGroup = require('../../helpers/media-group');
 const { resetTimer, setTimer } = require('../../helpers/timer');
+const { onUnknownError } = require('../../helpers/on-unknown-error');
 const {
     getCutText,
     textLimits,
@@ -34,12 +35,16 @@ const Edit = new WizardScene(
         if (!wishId) {
             delete ctx.session.wishToEdit;
 
-            await ctx.sendMessage(
-                ctx.session.messages.errors.unknown,
-                Markup.removeKeyboard()
-            );
+            try {
+                await ctx.sendMessage(
+                    ctx.session.messages.errors.unknown,
+                    Markup.removeKeyboard()
+                );
 
-            return await setTimer(ctx, WISHLIST);
+                return await setTimer(ctx, WISHLIST);
+            } catch (e) {
+                return await onUnknownError(ctx, e);
+            }
         }
 
         const wish = await Wish.findById(wishId);
@@ -47,12 +52,16 @@ const Edit = new WizardScene(
         if (!wish) {
             delete ctx.session.wishToEdit;
 
-            await ctx.sendMessage(
-                ctx.session.messages.errors.unknown,
-                Markup.removeKeyboard()
-            );
+            try {
+                await ctx.sendMessage(
+                    ctx.session.messages.errors.unknown,
+                    Markup.removeKeyboard()
+                );
 
-            return await setTimer(ctx, WISHLIST);
+                return await setTimer(ctx, WISHLIST);
+            } catch (e) {
+                return await onUnknownError(ctx, e);
+            }
         }
 
         ctx.scene.session.wish = wish;
@@ -67,80 +76,84 @@ const Edit = new WizardScene(
               ])
             : Markup.removeKeyboard();
 
-        if (wish.images.length > 1) {
-            await ctx.sendMediaGroup(getMediaGroup(wish.images));
-        } else if (wish.images.length === 1) {
-            await ctx.sendPhoto(wish.images[0], {
-                caption: markup,
-                parse_mode: 'Markdown',
-                ...keyboard
-            });
+        try {
+            if (wish.images.length > 1) {
+                await ctx.sendMediaGroup(getMediaGroup(wish.images));
+            } else if (wish.images.length === 1) {
+                await ctx.sendPhoto(wish.images[0], {
+                    caption: markup,
+                    parse_mode: 'Markdown',
+                    ...keyboard
+                });
+            }
+
+            if (wish.images.length !== 1) {
+                await ctx.replyWithMarkdown(markup, keyboard);
+            }
+
+            await ctx.sendMessage(
+                ctx.session.messages.wishlist.edit.description,
+                Markup.inlineKeyboard(
+                    [
+                        Markup.button.callback(
+                            ctx.session.messages.wishlist.edit.actions.title,
+                            TITLE
+                        ),
+                        Markup.button.callback(
+                            wish.description
+                                ? ctx.session.messages.wishlist.edit.actions
+                                      .updateDescription
+                                : ctx.session.messages.wishlist.edit.actions
+                                      .addDescription,
+                            DESCRIPTION
+                        ),
+                        Markup.button.callback(
+                            wish.images.length
+                                ? ctx.session.messages.wishlist.edit.actions
+                                      .updateImages
+                                : ctx.session.messages.wishlist.edit.actions
+                                      .addImages,
+                            IMAGES
+                        ),
+                        Markup.button.callback(
+                            wish.link
+                                ? ctx.session.messages.wishlist.edit.actions
+                                      .updateLink
+                                : ctx.session.messages.wishlist.edit.actions
+                                      .addLink,
+                            LINK
+                        ),
+                        Markup.button.callback(
+                            wish.priority
+                                ? ctx.session.messages.wishlist.edit.actions
+                                      .unsetPriority
+                                : ctx.session.messages.wishlist.edit.actions
+                                      .setPriority,
+                            PRIORITY
+                        ),
+                        Markup.button.callback(
+                            ctx.session.messages.wishlist.add.title,
+                            WISHLIST_ADD
+                        ),
+                        Markup.button.callback(
+                            ctx.session.messages.actions.back,
+                            BACK
+                        ),
+                        Markup.button.callback(
+                            ctx.session.messages.actions.home,
+                            GREETING
+                        )
+                    ],
+                    {
+                        columns: 1
+                    }
+                )
+            );
+
+            return ctx.wizard.next();
+        } catch (e) {
+            return await onUnknownError(ctx, e);
         }
-
-        if (wish.images.length !== 1) {
-            await ctx.replyWithMarkdown(markup, keyboard);
-        }
-
-        await ctx.sendMessage(
-            ctx.session.messages.wishlist.edit.description,
-            Markup.inlineKeyboard(
-                [
-                    Markup.button.callback(
-                        ctx.session.messages.wishlist.edit.actions.title,
-                        TITLE
-                    ),
-                    Markup.button.callback(
-                        wish.description
-                            ? ctx.session.messages.wishlist.edit.actions
-                                  .updateDescription
-                            : ctx.session.messages.wishlist.edit.actions
-                                  .addDescription,
-                        DESCRIPTION
-                    ),
-                    Markup.button.callback(
-                        wish.images.length
-                            ? ctx.session.messages.wishlist.edit.actions
-                                  .updateImages
-                            : ctx.session.messages.wishlist.edit.actions
-                                  .addImages,
-                        IMAGES
-                    ),
-                    Markup.button.callback(
-                        wish.link
-                            ? ctx.session.messages.wishlist.edit.actions
-                                  .updateLink
-                            : ctx.session.messages.wishlist.edit.actions
-                                  .addLink,
-                        LINK
-                    ),
-                    Markup.button.callback(
-                        wish.priority
-                            ? ctx.session.messages.wishlist.edit.actions
-                                  .unsetPriority
-                            : ctx.session.messages.wishlist.edit.actions
-                                  .setPriority,
-                        PRIORITY
-                    ),
-                    Markup.button.callback(
-                        ctx.session.messages.wishlist.add.title,
-                        WISHLIST_ADD
-                    ),
-                    Markup.button.callback(
-                        ctx.session.messages.actions.back,
-                        BACK
-                    ),
-                    Markup.button.callback(
-                        ctx.session.messages.actions.home,
-                        GREETING
-                    )
-                ],
-                {
-                    columns: 1
-                }
-            )
-        );
-
-        return ctx.wizard.next();
     },
     async ctx => {
         const callback = ctx.update?.callback_query?.data;
@@ -148,99 +161,125 @@ const Edit = new WizardScene(
         await resetTimer(ctx);
 
         if (!callback) {
-            await ctx.sendMessage(
-                ctx.session.messages.errors.unknown,
-                Markup.removeKeyboard()
-            );
+            try {
+                await ctx.sendMessage(
+                    ctx.session.messages.errors.unknown,
+                    Markup.removeKeyboard()
+                );
 
-            return await setTimer(ctx, WISHLIST_EDIT);
+                return await setTimer(ctx, WISHLIST_EDIT);
+            } catch (e) {
+                return await onUnknownError(ctx, e);
+            }
         }
 
         ctx.scene.session.callback = callback;
 
         switch (callback) {
             case TITLE:
-                await ctx.sendMessage(
-                    ctx.session.messages.wishlist.edit.scenes.title.replace(
-                        '%1',
-                        textLimits[textLimitTypes.TITLE]
-                    ),
-                    Markup.removeKeyboard()
-                );
+                try {
+                    await ctx.sendMessage(
+                        ctx.session.messages.wishlist.edit.scenes.title.replace(
+                            '%1',
+                            textLimits[textLimitTypes.TITLE]
+                        ),
+                        Markup.removeKeyboard()
+                    );
 
-                return ctx.wizard.next();
+                    return ctx.wizard.next();
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
             case DESCRIPTION:
-                if (ctx.scene.session.wish.description) {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.updateDescription.replace(
-                            '%1',
-                            textLimits[textLimitTypes.DESCRIPTION]
-                        ),
-                        Markup.keyboard([
-                            Markup.button.text(
-                                ctx.session.messages.actions.remove
-                            )
-                        ])
-                    );
-                } else {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.addDescription.replace(
-                            '%1',
-                            textLimits[textLimitTypes.DESCRIPTION]
-                        ),
-                        Markup.removeKeyboard()
-                    );
-                }
+                try {
+                    if (ctx.scene.session.wish.description) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes.updateDescription.replace(
+                                '%1',
+                                textLimits[textLimitTypes.DESCRIPTION]
+                            ),
+                            Markup.keyboard([
+                                Markup.button.text(
+                                    ctx.session.messages.actions.remove
+                                )
+                            ])
+                        );
+                    } else {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes.addDescription.replace(
+                                '%1',
+                                textLimits[textLimitTypes.DESCRIPTION]
+                            ),
+                            Markup.removeKeyboard()
+                        );
+                    }
 
-                return ctx.wizard.next();
+                    return ctx.wizard.next();
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
             case IMAGES:
-                if (ctx.scene.session.wish.images.length) {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.updateImages,
-                        Markup.keyboard([
-                            Markup.button.text(
-                                ctx.session.messages.actions.remove
-                            )
-                        ])
-                    );
-                } else {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.addImages,
-                        Markup.removeKeyboard()
-                    );
-                }
+                try {
+                    if (ctx.scene.session.wish.images.length) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes
+                                .updateImages,
+                            Markup.keyboard([
+                                Markup.button.text(
+                                    ctx.session.messages.actions.remove
+                                )
+                            ])
+                        );
+                    } else {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes.addImages,
+                            Markup.removeKeyboard()
+                        );
+                    }
 
-                return ctx.wizard.next();
+                    return ctx.wizard.next();
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
             case LINK:
-                if (ctx.scene.session.wish.link) {
+                try {
+                    if (ctx.scene.session.wish.link) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes
+                                .updateLink,
+                            Markup.keyboard([
+                                Markup.button.text(
+                                    ctx.session.messages.actions.remove
+                                )
+                            ])
+                        );
+                    } else {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes.addLink,
+                            Markup.removeKeyboard()
+                        );
+                    }
+
+                    return ctx.wizard.next();
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
+            case PRIORITY:
+                try {
+                    await ctx.scene.session.wish.updateOne({
+                        priority: !ctx.scene.session.wish.priority
+                    });
+
                     await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.updateLink,
-                        Markup.keyboard([
-                            Markup.button.text(
-                                ctx.session.messages.actions.remove
-                            )
-                        ])
-                    );
-                } else {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.scenes.addLink,
+                        ctx.session.messages.wishlist.edit.success.priority +
+                            ctx.session.messages.wishlist.edit.back,
                         Markup.removeKeyboard()
                     );
+
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
                 }
-
-                return ctx.wizard.next();
-            case PRIORITY:
-                await ctx.scene.session.wish.updateOne({
-                    priority: !ctx.scene.session.wish.priority
-                });
-
-                await ctx.sendMessage(
-                    ctx.session.messages.wishlist.edit.success.priority +
-                        ctx.session.messages.wishlist.edit.back,
-                    Markup.removeKeyboard()
-                );
-
-                return await setTimer(ctx, WISHLIST_EDIT);
             case WISHLIST_ADD:
                 delete ctx.session.wishToEdit;
 
@@ -254,12 +293,16 @@ const Edit = new WizardScene(
 
                 return await ctx.scene.enter(GREETING);
             default:
-                await ctx.sendMessage(
-                    ctx.session.messages.errors.unknown,
-                    Markup.removeKeyboard()
-                );
+                try {
+                    await ctx.sendMessage(
+                        ctx.session.messages.errors.unknown,
+                        Markup.removeKeyboard()
+                    );
 
-                return await setTimer(ctx, WISHLIST_EDIT);
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
         }
     },
     async ctx => {
@@ -267,194 +310,224 @@ const Edit = new WizardScene(
 
         switch (ctx.scene.session.callback) {
             case TITLE:
-                if (
-                    !textAnswer ||
-                    !trim(textAnswer) ||
-                    trim(textAnswer).length > textLimits[textLimitTypes.TITLE]
-                ) {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.errors.title +
-                            ctx.session.messages.wishlist.edit.back,
-                        Markup.removeKeyboard()
-                    );
-
-                    return await setTimer(ctx, WISHLIST_EDIT);
-                }
-
-                await ctx.scene.session.wish.updateOne({
-                    title: getCutText(textAnswer)
-                });
-                await ctx.sendMessage(
-                    ctx.session.messages.wishlist.edit.success.title +
-                        ctx.session.messages.wishlist.edit.back,
-                    Markup.removeKeyboard()
-                );
-
-                return await setTimer(ctx, WISHLIST_EDIT);
-            case DESCRIPTION:
-                if (
-                    !textAnswer ||
-                    !trim(textAnswer) ||
-                    trim(textAnswer).length >
-                        textLimits[textLimitTypes.DESCRIPTION]
-                ) {
-                    await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.errors.description +
-                            ctx.session.messages.wishlist.edit.back,
-                        Markup.removeKeyboard()
-                    );
-
-                    return await setTimer(ctx, WISHLIST_EDIT);
-                }
-
-                await ctx.scene.session.wish.updateOne({
-                    description:
-                        textAnswer === ctx.session.messages.actions.remove
-                            ? null
-                            : getCutText(textAnswer, textLimitTypes.DESCRIPTION)
-                });
-                await ctx.sendMessage(
-                    (textAnswer === ctx.session.messages.actions.remove
-                        ? ctx.session.messages.wishlist.edit.success
-                              .removeDescription
-                        : ctx.session.messages.wishlist.edit.success
-                              .updateDescription) +
-                        ctx.session.messages.wishlist.edit.back,
-                    Markup.removeKeyboard()
-                );
-
-                return await setTimer(ctx, WISHLIST_EDIT);
-            case IMAGES:
-                if (
-                    textAnswer &&
-                    textAnswer === ctx.session.messages.actions.remove
-                ) {
-                    if (ctx.scene.session.wish.images.length) {
-                        await ctx.deleteMessage();
-                        await ctx.scene.session.wish.updateOne({
-                            images: []
-                        });
+                try {
+                    if (
+                        !textAnswer ||
+                        !trim(textAnswer) ||
+                        trim(textAnswer).length >
+                            textLimits[textLimitTypes.TITLE]
+                    ) {
                         await ctx.sendMessage(
-                            ctx.session.messages.wishlist.edit.success
-                                .removeImages +
+                            ctx.session.messages.wishlist.edit.errors.title +
                                 ctx.session.messages.wishlist.edit.back,
                             Markup.removeKeyboard()
                         );
-                    } else {
+
+                        return await setTimer(ctx, WISHLIST_EDIT);
+                    }
+
+                    await ctx.scene.session.wish.updateOne({
+                        title: getCutText(textAnswer)
+                    });
+                    await ctx.sendMessage(
+                        ctx.session.messages.wishlist.edit.success.title +
+                            ctx.session.messages.wishlist.edit.back,
+                        Markup.removeKeyboard()
+                    );
+
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
+            case DESCRIPTION:
+                try {
+                    if (
+                        !textAnswer ||
+                        !trim(textAnswer) ||
+                        trim(textAnswer).length >
+                            textLimits[textLimitTypes.DESCRIPTION]
+                    ) {
                         await ctx.sendMessage(
                             ctx.session.messages.wishlist.edit.errors
-                                .removeImages +
+                                .description +
                                 ctx.session.messages.wishlist.edit.back,
                             Markup.removeKeyboard()
                         );
+
+                        return await setTimer(ctx, WISHLIST_EDIT);
                     }
 
-                    return await setTimer(ctx, WISHLIST_EDIT);
-                }
-
-                const contextImages = ctx.update?.message?.photo ?? [];
-
-                if (!contextImages.length) {
+                    await ctx.scene.session.wish.updateOne({
+                        description:
+                            textAnswer === ctx.session.messages.actions.remove
+                                ? null
+                                : getCutText(
+                                      textAnswer,
+                                      textLimitTypes.DESCRIPTION
+                                  )
+                    });
                     await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.errors.updateImages +
+                        (textAnswer === ctx.session.messages.actions.remove
+                            ? ctx.session.messages.wishlist.edit.success
+                                  .removeDescription
+                            : ctx.session.messages.wishlist.edit.success
+                                  .updateDescription) +
                             ctx.session.messages.wishlist.edit.back,
                         Markup.removeKeyboard()
                     );
 
                     return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
                 }
-
-                let originalImage = contextImages[0];
-
-                for (const image of contextImages) {
+            case IMAGES:
+                try {
                     if (
-                        originalImage.width > image.width &&
-                        originalImage.height > image.height
+                        textAnswer &&
+                        textAnswer === ctx.session.messages.actions.remove
                     ) {
-                        continue;
+                        if (ctx.scene.session.wish.images.length) {
+                            await ctx.deleteMessage();
+                            await ctx.scene.session.wish.updateOne({
+                                images: []
+                            });
+                            await ctx.sendMessage(
+                                ctx.session.messages.wishlist.edit.success
+                                    .removeImages +
+                                    ctx.session.messages.wishlist.edit.back,
+                                Markup.removeKeyboard()
+                            );
+                        } else {
+                            await ctx.sendMessage(
+                                ctx.session.messages.wishlist.edit.errors
+                                    .removeImages +
+                                    ctx.session.messages.wishlist.edit.back,
+                                Markup.removeKeyboard()
+                            );
+                        }
+
+                        return await setTimer(ctx, WISHLIST_EDIT);
                     }
 
-                    originalImage = image;
-                }
+                    const contextImages = ctx.update?.message?.photo ?? [];
 
-                if (!ctx.scene.session.images) {
-                    ctx.scene.session.images = {};
-                }
+                    if (!contextImages.length) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.errors
+                                .updateImages +
+                                ctx.session.messages.wishlist.edit.back,
+                            Markup.removeKeyboard()
+                        );
 
-                if (originalImage.file_id) {
-                    ctx.scene.session.images[originalImage.file_id] = true;
-                }
+                        return await setTimer(ctx, WISHLIST_EDIT);
+                    }
 
-                const wish = await Wish.findById(ctx.scene.session.wish._id);
-                const telegramMediaGroupLimitation = 9;
-                const images = [
-                    ...new Set([
-                        ...wish.images,
-                        ...Object.keys(ctx.scene.session.images)
-                    ])
-                ].filter(image => typeof image === 'string');
+                    let originalImage = contextImages[0];
 
-                if (images.length > telegramMediaGroupLimitation) {
-                    images.length = telegramMediaGroupLimitation;
-                }
+                    for (const image of contextImages) {
+                        if (
+                            originalImage.width > image.width &&
+                            originalImage.height > image.height
+                        ) {
+                            continue;
+                        }
 
-                await ctx.scene.session.wish.updateOne({
-                    images
-                });
+                        originalImage = image;
+                    }
 
-                await ctx.sendMessage(
-                    ctx.session.messages.wishlist.edit.success.updateImages +
-                        ctx.session.messages.wishlist.edit.back,
-                    Markup.removeKeyboard()
-                );
+                    if (!ctx.scene.session.images) {
+                        ctx.scene.session.images = {};
+                    }
 
-                return await setTimer(ctx, WISHLIST_EDIT);
-            case LINK:
-                if (
-                    !textAnswer ||
-                    !trim(textAnswer) ||
-                    !textAnswer.match(
-                        new RegExp(
-                            `http|${ctx.session.messages.actions.remove}`
-                        )
-                    )
-                ) {
+                    if (originalImage.file_id) {
+                        ctx.scene.session.images[originalImage.file_id] = true;
+                    }
+
+                    const wish = await Wish.findById(
+                        ctx.scene.session.wish._id
+                    );
+                    const telegramMediaGroupLimitation = 9;
+                    const images = [
+                        ...new Set([
+                            ...wish.images,
+                            ...Object.keys(ctx.scene.session.images)
+                        ])
+                    ].filter(image => typeof image === 'string');
+
+                    if (images.length > telegramMediaGroupLimitation) {
+                        images.length = telegramMediaGroupLimitation;
+                    }
+
+                    await ctx.scene.session.wish.updateOne({
+                        images
+                    });
+
                     await ctx.sendMessage(
-                        ctx.session.messages.wishlist.edit.errors.link,
+                        ctx.session.messages.wishlist.edit.success
+                            .updateImages +
+                            ctx.session.messages.wishlist.edit.back,
                         Markup.removeKeyboard()
                     );
 
                     return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
                 }
+            case LINK:
+                try {
+                    if (
+                        !textAnswer ||
+                        !trim(textAnswer) ||
+                        !textAnswer.match(
+                            new RegExp(
+                                `http|${ctx.session.messages.actions.remove}`
+                            )
+                        )
+                    ) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.errors.link,
+                            Markup.removeKeyboard()
+                        );
 
-                await ctx.scene.session.wish.updateOne({
-                    link:
-                        textAnswer === ctx.session.messages.actions.remove
-                            ? null
-                            : textAnswer.replace(
-                                  new RegExp('.*?(http)', 's'),
-                                  '$1'
-                              )
-                });
-                await ctx.sendMessage(
-                    (textAnswer === ctx.session.messages.actions.remove
-                        ? ctx.session.messages.wishlist.edit.success.removeLink
-                        : ctx.session.messages.wishlist.edit.success
-                              .updateLink) +
-                        ctx.session.messages.wishlist.edit.back,
-                    Markup.removeKeyboard()
-                );
+                        return await setTimer(ctx, WISHLIST_EDIT);
+                    }
 
-                return await setTimer(ctx, WISHLIST_EDIT);
+                    await ctx.scene.session.wish.updateOne({
+                        link:
+                            textAnswer === ctx.session.messages.actions.remove
+                                ? null
+                                : textAnswer.replace(
+                                      new RegExp('.*?(http)', 's'),
+                                      '$1'
+                                  )
+                    });
+                    await ctx.sendMessage(
+                        (textAnswer === ctx.session.messages.actions.remove
+                            ? ctx.session.messages.wishlist.edit.success
+                                  .removeLink
+                            : ctx.session.messages.wishlist.edit.success
+                                  .updateLink) +
+                            ctx.session.messages.wishlist.edit.back,
+                        Markup.removeKeyboard()
+                    );
+
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
             default:
                 delete ctx.session.wishToEdit;
 
-                await ctx.sendMessage(
-                    ctx.session.messages.errors.unknown,
-                    Markup.removeKeyboard()
-                );
+                try {
+                    await ctx.sendMessage(
+                        ctx.session.messages.errors.unknown,
+                        Markup.removeKeyboard()
+                    );
 
-                return await setTimer(ctx, WISHLIST);
+                    return await setTimer(ctx, WISHLIST);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
         }
     }
 );

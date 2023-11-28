@@ -7,6 +7,7 @@ const trim = require('../../helpers/trim');
 const removeKeyboard = require('../../helpers/remove-keyboard');
 const { setTimer } = require('../../helpers/timer');
 const { textLimits, textLimitTypes } = require('../../helpers/cut-text');
+const { onUnknownError } = require('../../helpers/on-unknown-error');
 const { GREETING, WISHLIST, WISHLIST_ADD, WISHLIST_EDIT } = require('../types');
 const { BACK } = {
     BACK: 'back'
@@ -15,29 +16,33 @@ const { BACK } = {
 const Add = new WizardScene(
     WISHLIST_ADD,
     async ctx => {
-        await ctx.sendMessage(
-            ctx.session.messages.wishlist.add.description.replace(
-                '%1',
-                textLimits[textLimitTypes.TITLE]
-            ),
-            Markup.inlineKeyboard(
-                [
-                    Markup.button.callback(
-                        ctx.session.messages.actions.back,
-                        BACK
-                    ),
-                    Markup.button.callback(
-                        ctx.session.messages.actions.home,
-                        GREETING
-                    )
-                ],
-                {
-                    columns: 1
-                }
-            )
-        );
+        try {
+            await ctx.sendMessage(
+                ctx.session.messages.wishlist.add.description.replace(
+                    '%1',
+                    textLimits[textLimitTypes.TITLE]
+                ),
+                Markup.inlineKeyboard(
+                    [
+                        Markup.button.callback(
+                            ctx.session.messages.actions.back,
+                            BACK
+                        ),
+                        Markup.button.callback(
+                            ctx.session.messages.actions.home,
+                            GREETING
+                        )
+                    ],
+                    {
+                        columns: 1
+                    }
+                )
+            );
 
-        return ctx.wizard.next();
+            return ctx.wizard.next();
+        } catch (e) {
+            return await onUnknownError(ctx, e);
+        }
     },
     async ctx => {
         const callback = ctx.update?.callback_query?.data ?? null;
@@ -57,12 +62,16 @@ const Add = new WizardScene(
                 !trim(message) &&
                 trim(message).length > textLimits[textLimitTypes.TITLE])
         ) {
-            await ctx.sendMessage(
-                ctx.session.messages.wishlist.add.error,
-                Markup.removeKeyboard()
-            );
+            try {
+                await ctx.sendMessage(
+                    ctx.session.messages.wishlist.add.error,
+                    Markup.removeKeyboard()
+                );
 
-            return await setTimer(ctx, WISHLIST_ADD);
+                return await setTimer(ctx, WISHLIST_ADD);
+            } catch (e) {
+                return await onUnknownError(ctx, e);
+            }
         }
 
         try {
@@ -79,14 +88,11 @@ const Add = new WizardScene(
                 ctx.session.messages.wishlist.add.success,
                 Markup.removeKeyboard()
             );
-        } catch (e) {
-            await ctx.sendMessage(
-                ctx.session.messages.errors.unknown,
-                Markup.removeKeyboard()
-            );
-        }
 
-        return await setTimer(ctx, WISHLIST_EDIT);
+            return await setTimer(ctx, WISHLIST_EDIT);
+        } catch (e) {
+            return await onUnknownError(ctx, e);
+        }
     }
 );
 

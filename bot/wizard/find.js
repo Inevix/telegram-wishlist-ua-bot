@@ -4,6 +4,7 @@ const {
 } = require('telegraf');
 const { resetTimer } = require('../helpers/timer');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
+const { onUnknownError } = require('../helpers/on-unknown-error');
 const { GREETING, FIND_LIST, THIRD_WISHLIST } = require('./types');
 
 const stepHandler = getComplexStepHandler([GREETING]);
@@ -21,17 +22,21 @@ const Find = new WizardScene(
 
         delete ctx.session.thirdWishlist;
 
-        await ctx.replyWithMarkdown(
-            ctx.session.messages.findList.description,
-            Markup.inlineKeyboard([
-                Markup.button.callback(
-                    ctx.session.messages.actions.home,
-                    GREETING
-                )
-            ])
-        );
+        try {
+            await ctx.replyWithMarkdown(
+                ctx.session.messages.findList.description,
+                Markup.inlineKeyboard([
+                    Markup.button.callback(
+                        ctx.session.messages.actions.home,
+                        GREETING
+                    )
+                ])
+            );
 
-        return ctx.wizard.next();
+            return ctx.wizard.next();
+        } catch (e) {
+            return await onUnknownError(ctx, e);
+        }
     },
     stepHandler
 );

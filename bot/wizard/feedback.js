@@ -4,6 +4,7 @@ const {
 } = require('telegraf');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
 const { setTimer } = require('../helpers/timer');
+const { onUnknownError } = require('../helpers/on-unknown-error');
 const { GREETING, FEEDBACK } = require('./types');
 
 const stepHandler = getComplexStepHandler([GREETING]);
@@ -29,33 +30,34 @@ stepHandler.on('message', async ctx => {
             ctx.session.messages.feedback.success,
             Markup.removeKeyboard()
         );
-    } catch (e) {
+
         sceneToLeave = FEEDBACK;
 
-        await ctx.sendMessage(
-            ctx.session.messages.errors.unknown,
-            Markup.removeKeyboard()
-        );
+        return await setTimer(ctx, sceneToLeave);
+    } catch (e) {
+        return await onUnknownError(ctx, e);
     }
-
-    return await setTimer(ctx, sceneToLeave);
 });
 
 const Feedback = new WizardScene(
     FEEDBACK,
     async ctx => {
-        await ctx.sendMessage(
-            ctx.session.messages.feedback.description.title +
-                ctx.session.messages.feedback.description.points,
-            Markup.inlineKeyboard([
-                Markup.button.callback(
-                    ctx.session.messages.actions.home,
-                    GREETING
-                )
-            ])
-        );
+        try {
+            await ctx.sendMessage(
+                ctx.session.messages.feedback.description.title +
+                    ctx.session.messages.feedback.description.points,
+                Markup.inlineKeyboard([
+                    Markup.button.callback(
+                        ctx.session.messages.actions.home,
+                        GREETING
+                    )
+                ])
+            );
 
-        return ctx.wizard.next();
+            return ctx.wizard.next();
+        } catch (e) {
+            return await onUnknownError(ctx, e);
+        }
     },
     stepHandler
 );
