@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check and Restart Docker Container
-        uses: appleboy/ssh-action@v0.1.3
+        uses: appleboy/ssh-action@v1.0.0
         env:
           CONTAINER_NAME: wishlist_bot
         with:
