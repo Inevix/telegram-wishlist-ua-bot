@@ -12,9 +12,8 @@
 !/env
 !/env/*.example
 !/.docker
-!/.docker/*.yml
-!/.docker/dev.dockerfile
-!/.docker/production.dockerfile
+!/.docker/compose.yaml
+!/.docker/Dockerfile
 !/.ansible
 !/.ansible/main.yml
 !/.ansible/roles
