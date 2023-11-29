@@ -18,19 +18,18 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: .ansible/main.yml
-          key: ${{secrets.SSH_PRIVATE_KEY}}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           inventory: |
             [all]
             ${{ secrets.VPS }} address=localhost
           options: |
-            -e NODE_ENV=production
-            -e GITHUB_REPO=${{github.repository}}
-            -e BOT_TOKEN=${{secrets.BOT_TOKEN}}
-            -e MONGODB_URI=${{secrets.MONGODB_URI}}
-            -e ADMIN_TELEGRAM_ID=${{secrets.ADMIN_TELEGRAM_ID}}
-            -e CHANNEL=${{vars.CHANNEL}}
-            -e GITHUB_REPO_URL=https://github.com/${{github.repository}}
-            -e PRINCESS_BOT_URL=${{vars.PRINCESS_BOT_URL}}
-            -e BUYMEACOFFEE=${{vars.BUYMEACOFFEE}}
-            -e MONOBANK=${{vars.MONOBANK}}
+            -e GITHUB_REPO=${{ github.repository }}
+            -e BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            -e MONGODB_URI=${{ secrets.MONGODB_URI }}
+            -e ADMIN_TELEGRAM_ID=${{ secrets.ADMIN_TELEGRAM_ID }}
+            -e CHANNEL=${{ vars.CHANNEL }}
+            -e GITHUB_REPO_URL=https://github.com/${{ github.repository }}
+            -e PRINCESS_BOT_URL=${{ vars.PRINCESS_BOT_URL }}
+            -e BUYMEACOFFEE=${{ vars.BUYMEACOFFEE }}
+            -e MONOBANK=${{ vars.MONOBANK }}
             -e ansible_port=${{ secrets.SSH_PORT }}

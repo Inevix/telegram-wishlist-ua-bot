@@ -1,19 +1,8 @@
-- name: Check the Wishlist Bot repo on VPS if it doesn't exist
-  stat:
-    path: "{{ dir }}"
-  register: result
-
-- name: Clone the Wishlist Bot repo on VPS if it doesn't exist
-  git:
-    repo: "git@github.com:{{ GITHUB_REPO }}.git"
-    dest: "{{ dir }}"
-  when: not result.stat.exists
-
 - name: Update Wishlist Bot repo on VPS
   git:
     repo: "git@github.com:{{ GITHUB_REPO }}.git"
     dest: "{{ dir }}"
-    update: yes
-    single_branch: yes
+    update: true
+    single_branch: true
     version: main
     accept_newhostkey: true
