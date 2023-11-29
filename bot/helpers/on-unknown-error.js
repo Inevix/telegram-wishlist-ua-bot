@@ -1,7 +1,8 @@
 const { Markup } = require('telegraf');
+const { getTime } = require('./get-time');
 
 const onUnknownError = async (ctx, exception) => {
-    const errorTime = new Date();
+    const errorTime = getTime();
 
     if (exception.response.error_code === 403) {
         console.log('Error Time:', errorTime);

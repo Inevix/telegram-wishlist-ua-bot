@@ -8,6 +8,7 @@
 !.eslintrc.js
 !.prettierrc.js
 !package.json
+!package-lock.json
 !/env
 !/env/*.example
 !/.docker

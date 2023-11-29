@@ -1,20 +1,26 @@
 - name: Build Wishlist Bot image on VPS
   docker_image:
-    name: wishlist_bot_image
+    name: "{{app_name}}_image"
     state: present
-    force_source: yes
+    force_source: true
     source: build
     build:
       path: "{{dir}}"
-      dockerfile: "./.docker/{{NODE_ENV}}.dockerfile"
+      dockerfile: "./.docker/Dockerfile"
+      args:
+          NODE_ENV: "{{NODE_ENV}}"
 
 - name: Restart Wishlist Bot container on VPS
   docker_container:
-    name: wishlist_bot
-    image: wishlist_bot_image
-    restart: yes
-    recreate: yes
-    network_mode: "host"
+    name: "{{app_name}}"
+    image: "{{app_name}}_image"
+    restart: true
+    restart_policy: always
+    recreate: true
+    log_driver: json-file
+    log_options:
+      max-size: "10m"
+      max-file: "5"
     env:
       NODE_ENV: "{{NODE_ENV}}"
       BOT_TOKEN: "{{BOT_TOKEN}}"
