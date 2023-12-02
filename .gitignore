@@ -26,6 +26,8 @@
 !/bot/**/*.json
 !/bot/helpers
 !/bot/i18n
+!/bot/i18n/messages
+!/bot/i18n/changelog
 !/bot/models
 !/bot/wizard
 !/bot/wizard/wishlist
