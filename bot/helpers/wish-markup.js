@@ -31,7 +31,7 @@ module.exports = async (
         );
         const hidden =
             wish.hidden && showHidden
-                ? escapeMarkdownV2(ctx.session.messages.markup.hidden)
+                ? escapeMarkdownV2(ctx.session.messages.markup.hidden, ['_'])
                 : '';
 
         if (onlyTitleAndDate) {
