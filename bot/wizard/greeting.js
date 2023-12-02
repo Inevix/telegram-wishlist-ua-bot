@@ -13,13 +13,11 @@ const {
     GIVE_LIST,
     FIND_LIST,
     FEEDBACK,
+    STATS,
     DONATE
 } = require('../wizard/types');
 const removeKeyboard = require('../helpers/remove-keyboard');
 const { onUnknownError } = require('../helpers/on-unknown-error');
-const { TOGGLE_GREETING } = {
-    TOGGLE_GREETING: 'toggle_greeting'
-};
 
 const stepHandler = getComplexStepHandler([
     PRIVACY,
@@ -28,22 +26,9 @@ const stepHandler = getComplexStepHandler([
     GIVE_LIST,
     FIND_LIST,
     FEEDBACK,
+    STATS,
     DONATE
 ]);
-
-stepHandler.action(TOGGLE_GREETING, async ctx => {
-    try {
-        await removeKeyboard(ctx);
-
-        await ctx.session.user.updateOne({
-            hideGreeting: !ctx.session.user.hideGreeting
-        });
-
-        await ctx.scene.enter(GREETING);
-    } catch (e) {
-        return await onUnknownError(ctx, e);
-    }
-});
 
 const Greeting = new WizardScene(
     GREETING,
@@ -76,35 +61,39 @@ const Greeting = new WizardScene(
             const telegramId = ctx.session.telegramId ?? messageId;
             const user = await User.findOne({ telegramId });
 
-            if (!user?.hideGreeting) {
-                await ctx.replyWithMarkdown(
-                    ctx.session.messages.greeting.general,
-                    Markup.removeKeyboard()
-                );
-            }
-
             if (!user) {
-                await ctx.replyWithMarkdown(
-                    ctx.session.messages.greeting.guest,
-                    Markup.inlineKeyboard(
-                        [
-                            Markup.button.callback(
-                                ctx.session.messages.auth.title,
-                                AUTH
-                            ),
-                            Markup.button.callback(
-                                ctx.session.messages.privacy.title,
-                                PRIVACY
-                            ),
-                            Markup.button.callback(
-                                ctx.session.messages.feedback.title,
-                                FEEDBACK
-                            )
-                        ],
-                        {
-                            columns: 1
-                        }
-                    )
+                await ctx.sendMessage(
+                    `${ctx.session.messages.greeting.general}\n\n${ctx.session.messages.greeting.guest}`,
+                    {
+                        ...Markup.inlineKeyboard(
+                            [
+                                Markup.button.callback(
+                                    ctx.session.messages.auth.title,
+                                    AUTH
+                                ),
+                                Markup.button.callback(
+                                    ctx.session.messages.privacy.title,
+                                    PRIVACY
+                                ),
+                                Markup.button.callback(
+                                    ctx.session.messages.feedback.title,
+                                    FEEDBACK
+                                ),
+                                Markup.button.callback(
+                                    ctx.session.messages.stats.title,
+                                    STATS
+                                ),
+                                Markup.button.callback(
+                                    ctx.session.messages.donate.title,
+                                    DONATE
+                                )
+                            ],
+                            {
+                                columns: 1
+                            }
+                        ),
+                        parse_mode: 'Markdown'
+                    }
                 );
 
                 return ctx.wizard.next();
@@ -123,15 +112,8 @@ const Greeting = new WizardScene(
                 ctx.session.user = await User.findById(user._id);
             }
 
-            const greetingAction = user.hideGreeting
-                ? ctx.session.messages.greeting.actions.show
-                : ctx.session.messages.greeting.actions.hide;
-
-            await ctx.replyWithMarkdown(
-                user.hideGreeting
-                    ? ctx.session.messages.greeting.hidden
-                    : ctx.session.messages.greeting.user,
-                Markup.inlineKeyboard(
+            await ctx.sendMessage(ctx.session.messages.greeting.user, {
+                ...Markup.inlineKeyboard(
                     [
                         Markup.button.callback(
                             ctx.session.messages.wishlist.title,
@@ -145,7 +127,6 @@ const Greeting = new WizardScene(
                             ctx.session.messages.findList.title,
                             FIND_LIST
                         ),
-                        Markup.button.callback(greetingAction, TOGGLE_GREETING),
                         Markup.button.callback(
                             ctx.session.messages.privacy.title,
                             PRIVACY
@@ -155,6 +136,10 @@ const Greeting = new WizardScene(
                             FEEDBACK
                         ),
                         Markup.button.callback(
+                            ctx.session.messages.stats.title,
+                            STATS
+                        ),
+                        Markup.button.callback(
                             ctx.session.messages.donate.title,
                             DONATE
                         )
@@ -162,8 +147,9 @@ const Greeting = new WizardScene(
                     {
                         columns: 1
                     }
-                )
-            );
+                ),
+                parse_mode: 'Markdown'
+            });
 
             return ctx.wizard.next();
         } catch (e) {

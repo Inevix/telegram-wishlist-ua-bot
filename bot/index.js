@@ -1,18 +1,97 @@
 const connectDb = require('./connect-db');
 const bot = require('./bot');
+const User = require('./models/user');
+const Wish = require('./models/wish');
+const Give = require('./models/give');
 const { getTime } = require('./helpers/get-time');
-
-const handleSignal = signal => {
-    console.log(`Received ${signal} ${getTime()}`);
-    bot.stop(signal);
-};
+const getChanges = require('./i18n/changelog');
 
 async function launchBot() {
     await connectDb();
-    process.once('SIGINT', () => handleSignal('SIGINT'));
-    process.once('SIGTERM', () => handleSignal('SIGTERM'));
     console.log(`Bot started ${getTime()}`);
-    await bot.launch();
+
+    bot.launch(); // don't add await before. launch() returns promise always in pending
+
+    const changelog = getChanges();
+    const latest = Object.keys(changelog)[0];
+    const { changes, date } = changelog[latest];
+    const message = `*${date}*\n- ${changes?.join('\n - ')}`;
+    let users;
+
+    if (!message) {
+        return this;
+    }
+
+    try {
+        users = await User.find({
+            version: {
+                $ne: latest
+            }
+        });
+    } catch (error) {
+        await Promise.reject(error);
+    }
+
+    if (!users.length) {
+        return this;
+    }
+
+    for await (const user of users) {
+        if (latest?.toString() === user.version?.toString() && user.noticed) {
+            continue;
+        }
+
+        if (
+            process.env.NODE_ENV === 'dev' &&
+            user.telegramId.toString() !==
+                process.env.ADMIN_TELEGRAM_ID.toString()
+        ) {
+            continue;
+        }
+
+        try {
+            await bot.telegram.sendMessage(user.telegramId, message, {
+                parse_mode: 'Markdown'
+            });
+            await User.findByIdAndUpdate(user._id, {
+                version: latest,
+                noticed: true
+            });
+        } catch (exception) {
+            if (
+                exception?.response?.error_code === 403 &&
+                process.env.NODE_ENV === 'production'
+            ) {
+                try {
+                    const id = exception?.on?.payload?.chat_id;
+                    const dbUser = await User.findById(user._id);
+
+                    if (!id) {
+                        continue;
+                    }
+
+                    await Wish.deleteMany({
+                        userId: dbUser._id
+                    });
+                    await Give.deleteMany({
+                        userId: dbUser._id
+                    });
+                    await User.findByIdAndRemove(dbUser._id);
+
+                    continue;
+                } catch (e) {
+                    console.log('Exception time:', getTime());
+                    console.error(e);
+                    continue;
+                }
+            } else if (exception?.response?.error_code === 400) {
+                continue;
+            }
+
+            console.log('Exception time:', getTime());
+            console.error(exception);
+        }
+    }
 }
 
 launchBot();

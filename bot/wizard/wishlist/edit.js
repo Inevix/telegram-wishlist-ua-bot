@@ -14,12 +14,13 @@ const {
     textLimitTypes
 } = require('../../helpers/cut-text');
 const { WISHLIST_EDIT, WISHLIST, GREETING, WISHLIST_ADD } = require('../types');
-const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, BACK } = {
+const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, VISIBILITY, BACK } = {
     TITLE: 'title',
     DESCRIPTION: 'description',
     IMAGES: 'images',
     LINK: 'link',
     PRIORITY: 'priority',
+    VISIBILITY: 'visibility',
     BACK: 'back'
 };
 
@@ -66,7 +67,7 @@ const Edit = new WizardScene(
 
         ctx.scene.session.wish = wish;
 
-        const markup = await getWishMarkup(ctx, wish);
+        const markup = await getWishMarkup(ctx, wish, false, false, true);
         const keyboard = wish.link
             ? Markup.inlineKeyboard([
                   Markup.button.url(
@@ -130,6 +131,14 @@ const Edit = new WizardScene(
                                 : ctx.session.messages.wishlist.edit.actions
                                       .setPriority,
                             PRIORITY
+                        ),
+                        Markup.button.callback(
+                            wish.hidden
+                                ? ctx.session.messages.wishlist.edit.actions
+                                      .show
+                                : ctx.session.messages.wishlist.edit.actions
+                                      .hide,
+                            VISIBILITY
                         ),
                         Markup.button.callback(
                             ctx.session.messages.wishlist.add.title,
@@ -272,6 +281,22 @@ const Edit = new WizardScene(
 
                     await ctx.sendMessage(
                         ctx.session.messages.wishlist.edit.success.priority +
+                            ctx.session.messages.wishlist.edit.back,
+                        Markup.removeKeyboard()
+                    );
+
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
+            case VISIBILITY:
+                try {
+                    await ctx.scene.session.wish.updateOne({
+                        hidden: !ctx.scene.session.wish.hidden
+                    });
+
+                    await ctx.sendMessage(
+                        ctx.session.messages.wishlist.edit.success.visibility +
                             ctx.session.messages.wishlist.edit.back,
                         Markup.removeKeyboard()
                     );

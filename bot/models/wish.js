@@ -22,6 +22,10 @@ module.exports = model(
             priority: {
                 type: Boolean,
                 default: false
+            },
+            hidden: {
+                type: Boolean,
+                default: false
             }
         },
         {

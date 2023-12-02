@@ -1,6 +1,6 @@
 const languages = {
-    uk: require('../i18n/uk.json'),
-    en: require('../i18n/en.json')
+    uk: require('../i18n/messages/uk.json'),
+    en: require('../i18n/messages/en.json')
 };
 
 module.exports = code => (languages[code] ? languages[code] : languages['uk']);

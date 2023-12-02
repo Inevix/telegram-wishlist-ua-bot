@@ -18,7 +18,12 @@ const userSchema = new Schema({
         sparse: true
     },
     language: String,
-    hideGreeting: {
+    telegraphAccessToken: {
+        type: String,
+        default: ''
+    },
+    version: String,
+    noticed: {
         type: Boolean,
         default: false
     }

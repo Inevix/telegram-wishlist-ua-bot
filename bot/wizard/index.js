@@ -10,5 +10,6 @@ module.exports = [
     require('./third-wishlist'),
     require('./give-list'),
     require('./feedback'),
+    require('./stats'),
     require('./donate')
 ];

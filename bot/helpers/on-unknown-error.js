@@ -4,19 +4,20 @@ const { getTime } = require('./get-time');
 const onUnknownError = async (ctx, exception) => {
     const errorTime = getTime();
 
-    if (exception.response.error_code === 403) {
-        console.log('Error Time:', errorTime);
+    console.log('Error Time:', errorTime);
 
+    if (exception?.response?.error_code === 403) {
         return console.error(exception);
     }
 
     try {
+        console.error(exception);
+
         await ctx.sendMessage(
             ctx.session.messages.errors.unknown,
             Markup.removeKeyboard()
         );
     } catch (e) {
-        console.log('Error Time:', errorTime);
         console.error(e);
     }
 };

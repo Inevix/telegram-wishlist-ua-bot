@@ -10,5 +10,6 @@ module.exports = {
     THIRD_WISHLIST: 'third_wishlist',
     GIVE_LIST: 'give_list',
     FEEDBACK: 'feedback',
+    STATS: 'stats',
     DONATE: 'donate'
 };

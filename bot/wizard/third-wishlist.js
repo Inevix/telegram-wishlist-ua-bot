@@ -172,7 +172,11 @@ const ThirdWishlist = new WizardScene(
                 return await setTimer(ctx, FIND_LIST);
             }
 
-            if (user._id.toString() === ctx.session.user._id.toString()) {
+            if (
+                user._id.toString() === ctx.session.user._id.toString() &&
+                user.telegramId.toString() !==
+                    process.env.ADMIN_TELEGRAM_ID.toString()
+            ) {
                 await ctx.sendMessage(
                     ctx.session.messages.findList.errors.foundYourself +
                         ctx.session.messages.findList.back,
@@ -207,6 +211,8 @@ const ThirdWishlist = new WizardScene(
             );
 
             for await (const wish of wishlist) {
+                if (wish.hidden) continue;
+
                 const markup = await getWishMarkup(ctx, wish, false);
 
                 if (!markup) continue;

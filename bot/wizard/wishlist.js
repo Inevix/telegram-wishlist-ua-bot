@@ -8,6 +8,7 @@ const getComplexStepHandler = require('../helpers/complex-step-handler');
 const getWishMarkup = require('../helpers/wish-markup');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 const { setTimer } = require('../helpers/timer');
+const share = require('../helpers/share');
 const {
     GREETING,
     WISHLIST,
@@ -15,13 +16,14 @@ const {
     WISHLIST_EDIT,
     WISHLIST_REMOVE
 } = require('./types');
-const { EDIT, REMOVE, CLEAN } = {
+const { EDIT, REMOVE, CLEAN, SHARE } = {
     EDIT: 'edit_',
     REMOVE: 'remove_',
-    CLEAN: 'clean'
+    CLEAN: 'clean',
+    SHARE: 'share'
 };
 
-const stepHandler = getComplexStepHandler([GREETING, WISHLIST_ADD]);
+const stepHandler = getComplexStepHandler([GREETING, WISHLIST, WISHLIST_ADD]);
 
 stepHandler.action(new RegExp(`${EDIT}`), async ctx => {
     ctx.session.wishToEdit = ctx.update.callback_query.data.replace(EDIT, '');
@@ -72,6 +74,10 @@ stepHandler.action(CLEAN, async ctx => {
     }
 });
 
+stepHandler.action(SHARE, async ctx => {
+    await share(ctx);
+});
+
 const Wishlist = new WizardScene(
     WISHLIST,
     async ctx => {
@@ -94,6 +100,12 @@ const Wishlist = new WizardScene(
                     Markup.button.callback(
                         ctx.session.messages.actions.clean,
                         CLEAN
+                    )
+                );
+                buttons.push(
+                    Markup.button.callback(
+                        ctx.session.messages.actions.share,
+                        SHARE
                     )
                 );
             }
@@ -122,7 +134,7 @@ const Wishlist = new WizardScene(
             );
 
             for await (const wish of wishlist) {
-                const markup = await getWishMarkup(ctx, wish, true, true);
+                const markup = await getWishMarkup(ctx, wish, true, true, true);
 
                 if (!markup) continue;
 

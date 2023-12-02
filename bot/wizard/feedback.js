@@ -5,6 +5,7 @@ const {
 const getComplexStepHandler = require('../helpers/complex-step-handler');
 const { setTimer } = require('../helpers/timer');
 const { onUnknownError } = require('../helpers/on-unknown-error');
+const getUsername = require('../helpers/username');
 const { GREETING, FEEDBACK } = require('./types');
 
 const stepHandler = getComplexStepHandler([GREETING]);
@@ -13,11 +14,8 @@ stepHandler.on('message', async ctx => {
     let sceneToLeave;
 
     try {
-        const {
-            from: { username, first_name, last_name },
-            text
-        } = ctx.update.message;
-        const user = username ? `@${username}` : `${first_name} ${last_name}`;
+        const { from, text } = ctx.update.message;
+        const user = getUsername(from, 'name');
         sceneToLeave = GREETING;
 
         await ctx.sendMessage({
