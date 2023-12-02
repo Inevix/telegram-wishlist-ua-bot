@@ -282,19 +282,18 @@ const ThirdWishlist = new WizardScene(
                 } else if (wish.images.length === 1) {
                     await ctx.sendPhoto(wish.images[0], {
                         caption: markup,
-                        parse_mode: 'Markdown',
+                        parse_mode: 'MarkdownV2',
                         ...extra
                     });
                 }
 
                 if (wish.images.length !== 1) {
-                    await ctx.replyWithMarkdown(markup, extra);
+                    await ctx.replyWithMarkdownV2(markup, extra);
                 }
             }
 
-            await ctx.replyWithMarkdown(
-                ctx.session.messages.findList.filled.after,
-                Markup.inlineKeyboard(
+            await ctx.sendMessage(ctx.session.messages.findList.filled.after, {
+                ...Markup.inlineKeyboard(
                     [
                         Markup.button.callback(
                             ctx.session.messages.actions.back,
@@ -308,8 +307,9 @@ const ThirdWishlist = new WizardScene(
                     {
                         columns: 1
                     }
-                )
-            );
+                ),
+                parse_mode: 'Markdown'
+            });
 
             return ctx.wizard.next();
         } catch (e) {

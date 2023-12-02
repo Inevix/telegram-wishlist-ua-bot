@@ -1,5 +1,6 @@
 const getDate = require('./date');
 const { getCutText, textLimitTypes } = require('./cut-text');
+const { escapeMarkdownV2 } = require('./markdown-v2-escaper');
 
 module.exports = async (
     ctx,
@@ -11,8 +12,8 @@ module.exports = async (
     try {
         if (!wish) return '';
 
-        const created = getDate(ctx, wish.createdAt);
-        const updated = getDate(ctx, wish.updatedAt);
+        const created = escapeMarkdownV2(getDate(ctx, wish.createdAt), ['_']);
+        const updated = escapeMarkdownV2(getDate(ctx, wish.updatedAt), ['_']);
         const showEditDate = created !== updated;
         const editDate = showEditDate
             ? ctx.session.messages.markup.date.updated.replace('%1', updated)
@@ -21,9 +22,12 @@ module.exports = async (
             '%1',
             created
         );
-        const title = ctx.session.messages.markup.title.replace(
-            '%1',
-            getCutText(wish.title)
+        const title = escapeMarkdownV2(
+            ctx.session.messages.markup.title.replace(
+                '%1',
+                getCutText(wish.title)
+            ),
+            ['*', '_', '[', ']', '(', ')']
         );
         const hidden =
             wish.hidden && showHidden ? ctx.session.messages.markup.hidden : '';
@@ -34,16 +38,21 @@ module.exports = async (
 
         let priority = '';
         const description = wish.description
-            ? ctx.session.messages.markup.description.replace(
-                  '%1',
-                  getCutText(wish.description, textLimitTypes.DESCRIPTION)
+            ? escapeMarkdownV2(
+                  ctx.session.messages.markup.description.replace(
+                      '%1',
+                      getCutText(wish.description, textLimitTypes.DESCRIPTION)
+                  )
               )
             : '';
 
         if (wish.priority) {
-            priority = owner
-                ? ctx.session.messages.markup.priority.owner
-                : ctx.session.messages.markup.priority.watcher;
+            priority = escapeMarkdownV2(
+                owner
+                    ? ctx.session.messages.markup.priority.owner
+                    : ctx.session.messages.markup.priority.watcher,
+                ['*', '>']
+            );
         }
 
         return title + priority + description + createdDate + editDate + hidden;

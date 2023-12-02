@@ -215,8 +215,8 @@
         "title": "❤\uFE0F *%1*",
         "description": "\n\n✏\uFE0F Опис:\n%1",
         "priority": {
-            "owner": "\n\n❗\uFE0F *Наразі дуже хочу це!*",
-            "watcher": "\n\n❗\uFE0F *Наразі дуже хоче це!*"
+            "owner": "\n\n> ❗\uFE0F *Наразі дуже хочу це!*",
+            "watcher": "\n\n> ❗\uFE0F *Наразі дуже хоче це!*"
         },
         "hidden": "\n\n\uD83E\uDEE3 _Це бажання приховане від інших!_",
         "date": {

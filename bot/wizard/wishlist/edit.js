@@ -83,80 +83,87 @@ const Edit = new WizardScene(
             } else if (wish.images.length === 1) {
                 await ctx.sendPhoto(wish.images[0], {
                     caption: markup,
-                    parse_mode: 'Markdown',
+                    parse_mode: 'MarkdownV2',
                     ...keyboard
                 });
             }
 
             if (wish.images.length !== 1) {
-                await ctx.replyWithMarkdown(markup, keyboard);
+                await ctx.sendMessage(markup, {
+                    ...keyboard,
+                    parse_mode: 'MarkdownV2'
+                });
             }
 
             await ctx.sendMessage(
                 ctx.session.messages.wishlist.edit.description,
-                Markup.inlineKeyboard(
-                    [
-                        Markup.button.callback(
-                            ctx.session.messages.wishlist.edit.actions.title,
-                            TITLE
-                        ),
-                        Markup.button.callback(
-                            wish.description
-                                ? ctx.session.messages.wishlist.edit.actions
-                                      .updateDescription
-                                : ctx.session.messages.wishlist.edit.actions
-                                      .addDescription,
-                            DESCRIPTION
-                        ),
-                        Markup.button.callback(
-                            wish.images.length
-                                ? ctx.session.messages.wishlist.edit.actions
-                                      .updateImages
-                                : ctx.session.messages.wishlist.edit.actions
-                                      .addImages,
-                            IMAGES
-                        ),
-                        Markup.button.callback(
-                            wish.link
-                                ? ctx.session.messages.wishlist.edit.actions
-                                      .updateLink
-                                : ctx.session.messages.wishlist.edit.actions
-                                      .addLink,
-                            LINK
-                        ),
-                        Markup.button.callback(
-                            wish.priority
-                                ? ctx.session.messages.wishlist.edit.actions
-                                      .unsetPriority
-                                : ctx.session.messages.wishlist.edit.actions
-                                      .setPriority,
-                            PRIORITY
-                        ),
-                        Markup.button.callback(
-                            wish.hidden
-                                ? ctx.session.messages.wishlist.edit.actions
-                                      .show
-                                : ctx.session.messages.wishlist.edit.actions
-                                      .hide,
-                            VISIBILITY
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.wishlist.add.title,
-                            WISHLIST_ADD
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.actions.back,
-                            BACK
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.actions.home,
-                            GREETING
-                        )
-                    ],
-                    {
-                        columns: 1
-                    }
-                )
+                {
+                    ...Markup.inlineKeyboard(
+                        [
+                            Markup.button.callback(
+                                ctx.session.messages.wishlist.edit.actions
+                                    .title,
+                                TITLE
+                            ),
+                            Markup.button.callback(
+                                wish.description
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .updateDescription
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .addDescription,
+                                DESCRIPTION
+                            ),
+                            Markup.button.callback(
+                                wish.images.length
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .updateImages
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .addImages,
+                                IMAGES
+                            ),
+                            Markup.button.callback(
+                                wish.link
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .updateLink
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .addLink,
+                                LINK
+                            ),
+                            Markup.button.callback(
+                                wish.priority
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .unsetPriority
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .setPriority,
+                                PRIORITY
+                            ),
+                            Markup.button.callback(
+                                wish.hidden
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .show
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .hide,
+                                VISIBILITY
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.wishlist.add.title,
+                                WISHLIST_ADD
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.actions.back,
+                                BACK
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.actions.home,
+                                GREETING
+                            )
+                        ],
+                        {
+                            columns: 1
+                        }
+                    ),
+                    parse_mode: 'MarkdownV2'
+                }
             );
 
             return ctx.wizard.next();

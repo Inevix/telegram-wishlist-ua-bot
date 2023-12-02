@@ -4,8 +4,8 @@ const { TITLE, DESCRIPTION } = {
 };
 
 const LIMITS = {
-    [TITLE]: 100,
-    [DESCRIPTION]: 300
+    [TITLE]: 200,
+    [DESCRIPTION]: 500
 };
 
 const getCutText = (str, type = TITLE) => {

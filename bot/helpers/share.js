@@ -74,11 +74,18 @@ const domToNode = domNode => {
     return nodeElement;
 };
 
-const markdownToHtml = text => {
+const markdownToHtml = (text, escapeSpaces = true) => {
+    if (escapeSpaces) {
+        text = text.replace(/\n/g, '');
+    }
+
     return text
-        .replace(/\n/g, '')
         .replace(/_(.+?)_/g, '<em>$1</em>')
-        .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+        .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+        .replace(
+            /((?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*|www\.[^\s\/$.?#].[^\s]*)/g,
+            '<a href="$1">$1</a>'
+        );
 };
 
 // https://telegra.ph/api#NodeElement
@@ -91,21 +98,21 @@ const getHtmlLayout = async (ctx, wishlist) => {
 
             const { title, description, link, priority, createdAt, updatedAt } =
                 wish;
-            const created = getDate(ctx, wish.createdAt);
-            const updated = getDate(ctx, wish.updatedAt);
+            const created = getDate(ctx, createdAt);
+            const updated = getDate(ctx, updatedAt);
 
             result += `<h3>${getCutText(title)}</h3>`;
 
             if (description) {
-                result += `<p>${getCutText(
-                    description,
-                    textLimitTypes.DESCRIPTION
+                result += `<p>${markdownToHtml(
+                    getCutText(description, textLimitTypes.DESCRIPTION),
+                    false
                 )}</p>`;
             }
 
             if (priority) {
                 result += `<blockquote>${markdownToHtml(
-                    ctx.session.messages.markup.priority.owner
+                    ctx.session.messages.markup.priority.owner.replace('> ', '')
                 )}</blockquote>`;
             }
 

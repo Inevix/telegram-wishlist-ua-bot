@@ -149,7 +149,7 @@ const Wishlist = new WizardScene(
                     )
                 ];
 
-                await ctx.replyWithMarkdown(
+                await ctx.replyWithMarkdownV2(
                     markup,
                     Markup.inlineKeyboard(buttons, {
                         columns: 2
