@@ -30,7 +30,9 @@ module.exports = async (
             ['*', '_', '[', ']', '(', ')']
         );
         const hidden =
-            wish.hidden && showHidden ? ctx.session.messages.markup.hidden : '';
+            wish.hidden && showHidden
+                ? escapeMarkdownV2(ctx.session.messages.markup.hidden)
+                : '';
 
         if (onlyTitleAndDate) {
             return title + (editDate ? `\n${editDate}` : createdDate) + hidden;
