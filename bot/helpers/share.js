@@ -2,6 +2,7 @@ const { JSDOM } = require('jsdom');
 const Wish = require('../models/wish');
 const { Markup } = require('telegraf');
 const { setTimer } = require('./timer');
+const { getTime } = require('./get-time');
 const { WISHLIST } = require('../wizard/types');
 const getUsername = require('./username');
 const { onUnknownError } = require('./on-unknown-error');
@@ -136,24 +137,39 @@ const getHtmlLayout = async (ctx, wishlist) => {
             result += `<hr/>`;
         }
 
+        const { WISHLIST_BOT_URL } = process.env;
+
+        result += `<aside>`;
+        result += `<p><a href="${WISHLIST_BOT_URL}">${ctx.session.messages.title}</a></p>`;
+        result += `</aside>`;
+
         return `<article id="article">${result}</article>`;
     } catch (e) {
         throw e;
     }
 };
 
-const createPage = async (ctx, wishlist) => {
+const createPage = async (ctx, wishlist, debug = false) => {
     try {
         const html = await getHtmlLayout(ctx, wishlist);
+
+        if (debug) {
+            console.log(html);
+            return this;
+        }
+
         const { document } = new JSDOM(html).window;
         const content = domToNode(document.getElementById('article')).children;
         const { telegraphAccessToken, username } = ctx.session.user;
         const name = getUsername(ctx.update.callback_query.from, 'name');
         const url = new URL('https://api.telegra.ph/createPage');
+        const prefix =
+            process.env.NODE_ENV === 'dev' ? `${process.env.NODE_ENV}_` : '';
         const params = {
             access_token: telegraphAccessToken,
-            short_name: username,
-            author_name: getUsername(ctx.update.callback_query.from, 'name'),
+            short_name: prefix + username,
+            author_name:
+                prefix + getUsername(ctx.update.callback_query.from, 'name'),
             author_url: `https://t.me/${username}`,
             title: ctx.session.messages.share.title.replace('%name', name),
             content: JSON.stringify(content)
@@ -164,6 +180,10 @@ const createPage = async (ctx, wishlist) => {
         const response = await fetch(url.toString());
 
         if (!response.ok) {
+            // Telegraph API doesn't allow to contain more than 6 links
+            console.log('Response error time', getTime());
+            console.error(response.status, response.statusText);
+
             await ctx.sendMessage(
                 ctx.session.messages.errors.unknown,
                 Markup.removeKeyboard()
@@ -187,6 +207,7 @@ const createPage = async (ctx, wishlist) => {
             ])
         );
     } catch (e) {
+        console.log(e);
         throw e;
     }
 };

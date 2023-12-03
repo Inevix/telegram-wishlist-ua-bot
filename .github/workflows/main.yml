@@ -29,6 +29,7 @@ jobs:
             -e ADMIN_TELEGRAM_ID=${{ secrets.ADMIN_TELEGRAM_ID }}
             -e CHANNEL=${{ vars.CHANNEL }}
             -e GITHUB_REPO_URL=https://github.com/${{ github.repository }}
+            -e WISHLIST_BOT_URL=${{ vars.WISHLIST_BOT_URL }}
             -e PRINCESS_BOT_URL=${{ vars.PRINCESS_BOT_URL }}
             -e BUYMEACOFFEE=${{ vars.BUYMEACOFFEE }}
             -e MONOBANK=${{ vars.MONOBANK }}

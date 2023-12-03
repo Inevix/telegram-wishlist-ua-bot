@@ -13,7 +13,10 @@ const Donate = new WizardScene(
     async ctx => {
         try {
             await ctx.sendMessage(
-                ctx.session.messages.donate.description,
+                ctx.session.messages.donate.description.replace(
+                    '%paypal',
+                    process.env.PAYPAL
+                ),
                 Markup.inlineKeyboard(
                     [
                         ...ctx.session.messages.donate.services

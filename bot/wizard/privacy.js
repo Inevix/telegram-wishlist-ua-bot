@@ -12,8 +12,13 @@ const Privacy = new WizardScene(
     PRIVACY,
     async ctx => {
         try {
-            const { GITHUB_REPO_URL, PRINCESS_BOT_URL, YOUTUBE, CHANNEL } =
-                process.env;
+            const {
+                GITHUB_REPO_URL,
+                PRINCESS_BOT_URL,
+                YOUTUBE,
+                CHANNEL,
+                PORTFOLIO
+            } = process.env;
             const buttons = [];
 
             if (GITHUB_REPO_URL) {
@@ -48,6 +53,15 @@ const Privacy = new WizardScene(
                     Markup.button.url(
                         ctx.session.messages.privacy.links.telegram,
                         CHANNEL
+                    )
+                );
+            }
+
+            if (PORTFOLIO) {
+                buttons.push(
+                    Markup.button.url(
+                        ctx.session.messages.privacy.links.portfolio,
+                        PORTFOLIO
                     )
                 );
             }
