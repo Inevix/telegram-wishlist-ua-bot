@@ -164,7 +164,7 @@ const GiveList = new WizardScene(
                 } else if (wish.images.length === 1) {
                     await ctx.sendPhoto(wish.images[0], {
                         caption: markup,
-                        parse_mode: 'Markdown',
+                        parse_mode: 'MarkdownV2',
                         ...Markup.inlineKeyboard(buttons, {
                             columns: 1
                         })
@@ -172,7 +172,7 @@ const GiveList = new WizardScene(
                 }
 
                 if (wish.images.length !== 1) {
-                    await ctx.replyWithMarkdown(
+                    await ctx.replyWithMarkdownV2(
                         markup,
                         Markup.inlineKeyboard(buttons, {
                             columns: 1
@@ -185,9 +185,8 @@ const GiveList = new WizardScene(
         }
 
         try {
-            await ctx.replyWithMarkdown(
-                ctx.session.messages.giveList.filled.after,
-                Markup.inlineKeyboard(
+            await ctx.sendMessage(ctx.session.messages.giveList.filled.after, {
+                ...Markup.inlineKeyboard(
                     [
                         Markup.button.callback(
                             ctx.session.messages.actions.clean,
@@ -201,8 +200,9 @@ const GiveList = new WizardScene(
                     {
                         columns: 1
                     }
-                )
-            );
+                ),
+                parse_mode: 'Markdown'
+            });
 
             return ctx.wizard.next();
         } catch (e) {
