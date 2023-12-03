@@ -16,6 +16,7 @@ const Stats = new WizardScene(
         try {
             const users = await User.find().count();
             const wishes = await Wish.find().count();
+            const doneWishes = await Wish.find({ done: true }).count();
 
             await ctx.sendMessage(
                 `${
@@ -23,7 +24,13 @@ const Stats = new WizardScene(
                 }\n\n${ctx.session.messages.stats.users.replace(
                     '%1',
                     users
-                )}\n${ctx.session.messages.stats.wishes.replace('%1', wishes)}`,
+                )}\n${ctx.session.messages.stats.wishes.replace(
+                    '%1',
+                    wishes
+                )}\n${ctx.session.messages.stats.done.replace(
+                    '%1',
+                    doneWishes
+                )}`,
                 {
                     ...Markup.inlineKeyboard(
                         [

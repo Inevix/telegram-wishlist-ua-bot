@@ -80,7 +80,7 @@ const Greeting = new WizardScene(
                                     FEEDBACK
                                 ),
                                 Markup.button.callback(
-                                    ctx.session.messages.stats.title,
+                                    ctx.session.messages.stats.action,
                                     STATS
                                 ),
                                 Markup.button.callback(
@@ -136,7 +136,7 @@ const Greeting = new WizardScene(
                             FEEDBACK
                         ),
                         Markup.button.callback(
-                            ctx.session.messages.stats.title,
+                            ctx.session.messages.stats.action,
                             STATS
                         ),
                         Markup.button.callback(

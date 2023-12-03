@@ -187,7 +187,9 @@ const ThirdWishlist = new WizardScene(
             }
 
             const wishlist = await Wish.find({
-                userId: user._id
+                userId: user._id,
+                hidden: false,
+                done: false
             }).sort({
                 priority: -1,
                 updatedAt: -1
@@ -211,8 +213,6 @@ const ThirdWishlist = new WizardScene(
             );
 
             for await (const wish of wishlist) {
-                if (wish.hidden) continue;
-
                 const markup = await getWishMarkup(ctx, wish, false);
 
                 if (!markup) continue;

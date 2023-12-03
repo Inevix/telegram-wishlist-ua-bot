@@ -83,7 +83,8 @@ const Wishlist = new WizardScene(
     async ctx => {
         try {
             const wishlist = await Wish.find({
-                userId: ctx.session.user._id
+                userId: ctx.session.user._id,
+                done: false
             }).sort({
                 priority: -1,
                 updatedAt: -1

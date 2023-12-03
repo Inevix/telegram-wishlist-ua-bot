@@ -95,8 +95,6 @@ const getHtmlLayout = async (ctx, wishlist) => {
         let result = '';
 
         for await (const wish of wishlist) {
-            if (wish.hidden) continue;
-
             const { title, description, link, priority, createdAt, updatedAt } =
                 wish;
             const created = getDate(ctx, createdAt);
@@ -210,7 +208,14 @@ const createPage = async (ctx, wishlist, debug = false) => {
 module.exports = async ctx => {
     try {
         const { user } = ctx.session;
-        const wishlist = await Wish.find({ userId: user._id });
+        const wishlist = await Wish.find({
+            userId: user._id,
+            done: false,
+            hidden: false
+        }).sort({
+            priority: -1,
+            updatedAt: -1
+        });
 
         if (!wishlist.length) {
             await ctx.sendMessage(

@@ -70,9 +70,6 @@ async function launchBot() {
                         continue;
                     }
 
-                    await Wish.deleteMany({
-                        userId: dbUser._id
-                    });
                     await Give.deleteMany({
                         userId: dbUser._id
                     });

@@ -26,6 +26,10 @@ module.exports = model(
             hidden: {
                 type: Boolean,
                 default: false
+            },
+            done: {
+                type: Boolean,
+                default: false
             }
         },
         {
