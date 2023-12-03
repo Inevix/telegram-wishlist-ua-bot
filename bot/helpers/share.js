@@ -210,8 +210,12 @@ module.exports = async ctx => {
         const { user } = ctx.session;
         const wishlist = await Wish.find({
             userId: user._id,
-            done: false,
-            hidden: false
+            done: {
+                $ne: true
+            },
+            hidden: {
+                $ne: true
+            }
         }).sort({
             priority: -1,
             updatedAt: -1
