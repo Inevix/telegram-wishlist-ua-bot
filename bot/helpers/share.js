@@ -163,13 +163,10 @@ const createPage = async (ctx, wishlist, debug = false) => {
         const { telegraphAccessToken, username } = ctx.session.user;
         const name = getUsername(ctx.update.callback_query.from, 'name');
         const url = new URL('https://api.telegra.ph/createPage');
-        const prefix =
-            process.env.NODE_ENV === 'dev' ? `${process.env.NODE_ENV}_` : '';
         const params = {
             access_token: telegraphAccessToken,
-            short_name: prefix + username,
-            author_name:
-                prefix + getUsername(ctx.update.callback_query.from, 'name'),
+            short_name: username,
+            author_name: getUsername(ctx.update.callback_query.from, 'name'),
             author_url: `https://t.me/${username}`,
             title: ctx.session.messages.share.title.replace('%name', name),
             content: JSON.stringify(content)
