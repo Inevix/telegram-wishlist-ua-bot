@@ -137,10 +137,8 @@ const getHtmlLayout = async (ctx, wishlist) => {
             result += `<hr/>`;
         }
 
-        const { WISHLIST_BOT_URL } = process.env;
-
         result += `<aside>`;
-        result += `<p><a href="${WISHLIST_BOT_URL}">${ctx.session.messages.title}</a></p>`;
+        result += `<p><a href="${process.env.WISHLIST_BOT_URL}">${ctx.session.messages.title}</a></p>`;
         result += `</aside>`;
 
         return `<article id="article">${result}</article>`;

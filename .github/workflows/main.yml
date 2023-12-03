@@ -33,4 +33,5 @@ jobs:
             -e PRINCESS_BOT_URL=${{ vars.PRINCESS_BOT_URL }}
             -e BUYMEACOFFEE=${{ vars.BUYMEACOFFEE }}
             -e MONOBANK=${{ vars.MONOBANK }}
+            -e PAYPAL=${{ vars.PAYPAL }}
             -e ansible_port=${{ secrets.SSH_PORT }}
