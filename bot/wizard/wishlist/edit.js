@@ -357,7 +357,7 @@ const Edit = new WizardScene(
                         );
 
                         return await setTimer(ctx, WISHLIST_EDIT);
-                    } else if (textAnswer.contains('http')) {
+                    } else if (textAnswer.includes('http')) {
                         await ctx.sendMessage(
                             ctx.session.messages.wishlist.edit.errors.title
                                 .link + ctx.session.messages.wishlist.edit.back,
