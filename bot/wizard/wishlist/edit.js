@@ -381,8 +381,6 @@ const Edit = new WizardScene(
                     return await onUnknownError(ctx, e);
                 }
             case DESCRIPTION:
-                const linksLimit = 4;
-
                 try {
                     if (
                         !textAnswer ||
@@ -392,27 +390,8 @@ const Edit = new WizardScene(
                     ) {
                         await ctx.sendMessage(
                             ctx.session.messages.wishlist.edit.errors
-                                .description.general +
+                                .description +
                                 ctx.session.messages.wishlist.edit.back,
-                            Markup.removeKeyboard()
-                        );
-
-                        return await setTimer(ctx, WISHLIST_EDIT);
-                    } else if (
-                        textAnswer.match(/http/gi)?.length > linksLimit
-                    ) {
-                        /**
-                         * Telegraph API doesn't allow to contain more than 6 links.
-                         * So we limit it to 4 links only for description,
-                         * 'cause we need to add 2 more links:
-                         * 1. for the wish link even if it doesn't exist
-                         * 2. and footer copyright.
-                         */
-                        await ctx.sendMessage(
-                            ctx.session.messages.wishlist.edit.errors.description.links.replace(
-                                '%1',
-                                linksLimit
-                            ) + ctx.session.messages.wishlist.edit.back,
                             Markup.removeKeyboard()
                         );
 

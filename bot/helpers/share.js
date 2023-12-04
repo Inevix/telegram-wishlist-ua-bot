@@ -82,7 +82,11 @@ const markdownToHtml = (text, escapeSpaces = true) => {
 
     return text
         .replace(/_(.+?)_/g, '<em>$1</em>')
-        .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+        .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+        .replace(
+            /((?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*|www\.[^\s\/$.?#].[^\s]*)/g,
+            '<a href="$1">$1</a>'
+        );
 };
 
 // https://telegra.ph/api#NodeElement
@@ -136,8 +140,24 @@ const getHtmlLayout = async (ctx, wishlist, debug) => {
         }
 
         result += `<aside>`;
-        result += `<p><a href="${process.env.WISHLIST_BOT_URL}">${ctx.session.messages.title}</a></p>`;
+        result += `<a href="${process.env.WISHLIST_BOT_URL}">${ctx.session.messages.title}</a>`;
         result += `</aside>`;
+
+        const { services } = ctx.session.messages.donate;
+
+        if (services?.length) {
+            result += `<aside>`;
+
+            for await (const [index, { id, title }] of services.entries()) {
+                if (!(id in process.env)) continue;
+
+                const divider = index === services.length - 1 ? '' : ' • ';
+
+                result += `<a href="${process.env[id]}">${title}</a>${divider}`;
+            }
+
+            result += `</aside>`;
+        }
 
         return `<article id="article">${result}</article>`;
     } catch (e) {
@@ -176,14 +196,23 @@ const createPage = async (
             content: JSON.stringify(content)
         };
 
-        url.search = new URLSearchParams(params).toString();
-
-        const response = await fetch(url.toString());
+        // Get request has string limitation. Use POST instead.
+        const response = await fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
 
         if (!response.ok) {
-            // Telegraph API doesn't allow to contain more than 6 links
             console.log('Response error time', getTime());
             console.error(response.status, response.statusText);
+
+            if (debug) {
+                console.log('response', response);
+                console.log('url', url.toString());
+            }
 
             await ctx.sendMessage(
                 ctx.session.messages.errors.unknown,
