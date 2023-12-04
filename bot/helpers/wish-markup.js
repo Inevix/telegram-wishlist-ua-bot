@@ -27,7 +27,7 @@ module.exports = async (
                 '%1',
                 getCutText(wish.title)
             ),
-            ['*', '_', '[', ']', '(', ')']
+            ['*']
         );
         const hidden =
             wish.hidden && showHidden

@@ -27,6 +27,10 @@ module.exports = model(
                 type: Boolean,
                 default: false
             },
+            removed: {
+                type: Boolean,
+                default: false
+            },
             done: {
                 type: Boolean,
                 default: false

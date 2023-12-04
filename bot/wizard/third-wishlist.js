@@ -191,7 +191,7 @@ const ThirdWishlist = new WizardScene(
                 hidden: {
                     $ne: true
                 },
-                done: {
+                removed: {
                     $ne: true
                 }
             }).sort({

@@ -82,17 +82,17 @@ const markdownToHtml = (text, escapeSpaces = true) => {
 
     return text
         .replace(/_(.+?)_/g, '<em>$1</em>')
-        .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
-        .replace(
-            /((?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*|www\.[^\s\/$.?#].[^\s]*)/g,
-            '<a href="$1">$1</a>'
-        );
+        .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
 };
 
 // https://telegra.ph/api#NodeElement
-const getHtmlLayout = async (ctx, wishlist) => {
+const getHtmlLayout = async (ctx, wishlist, debug) => {
     try {
         let result = '';
+
+        if (debug) {
+            console.log(wishlist);
+        }
 
         for await (const wish of wishlist) {
             const { title, description, link, priority, createdAt, updatedAt } =
@@ -145,13 +145,21 @@ const getHtmlLayout = async (ctx, wishlist) => {
     }
 };
 
-const createPage = async (ctx, wishlist, debug = false) => {
+const createPage = async (
+    ctx,
+    wishlist,
+    debug = process.env.NODE_ENV !== 'production',
+    stop = false
+) => {
     try {
-        const html = await getHtmlLayout(ctx, wishlist);
+        const html = await getHtmlLayout(ctx, wishlist, debug);
 
         if (debug) {
             console.log(html);
-            return this;
+
+            if (stop) {
+                return this;
+            }
         }
 
         const { document } = new JSDOM(html).window;
@@ -210,7 +218,7 @@ module.exports = async ctx => {
         const { user } = ctx.session;
         const wishlist = await Wish.find({
             userId: user._id,
-            done: {
+            removed: {
                 $ne: true
             },
             hidden: {

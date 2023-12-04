@@ -57,11 +57,10 @@ stepHandler.action(CLEAN, async ctx => {
             await Give.findOneAndDelete({
                 wishId: wish._id
             });
+            await Wish.findByIdAndUpdate(wish._id, {
+                remove: true
+            });
         }
-
-        await Wish.deleteMany({
-            userId: ctx.session.user._id
-        });
 
         await ctx.sendMessage(
             ctx.session.messages.wishlist.clean.success,
@@ -84,7 +83,7 @@ const Wishlist = new WizardScene(
         try {
             const wishlist = await Wish.find({
                 userId: ctx.session.user._id,
-                done: {
+                removed: {
                     $ne: true
                 }
             }).sort({

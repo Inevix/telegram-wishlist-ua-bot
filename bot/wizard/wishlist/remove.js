@@ -64,6 +64,7 @@ const Remove = new WizardScene(
             delete ctx.session.wishToRemove;
 
             await Wish.findByIdAndUpdate(wishId, {
+                removed: true,
                 done: callback === YES
             });
             await Give.deleteMany({
