@@ -17,31 +17,70 @@ const Auth = new WizardScene(
     AUTH,
     async ctx => {
         try {
-            await ctx.replyWithMarkdown(
-                ctx.session.messages.auth.description,
-                Markup.inlineKeyboard(
-                    [
-                        Markup.button.callback(
-                            ctx.session.messages.auth.types.username,
-                            ONLY_USERNAME
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.auth.types.phone,
-                            ONLY_PHONE_NUMBER
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.auth.types.both,
+            const { user } = ctx.session;
+            let userVisibilityType;
+
+            if (user?.username && user?.phone) {
+                userVisibilityType = USERNAME_AND_PHONE_NUMBER;
+            } else if (user?.username && !user?.phone) {
+                userVisibilityType = ONLY_USERNAME;
+            } else if (!user?.username && user?.phone) {
+                userVisibilityType = ONLY_PHONE_NUMBER;
+            }
+
+            const generalQuestion =
+                ctx.session.messages.auth.description.general;
+            const noteAboutUsername =
+                ctx.session.messages.auth.description.username
+                    .replace(
+                        `%${ONLY_USERNAME}`,
+                        ctx.session.messages.auth.types[ONLY_USERNAME]
+                    )
+                    .replace(
+                        `%${USERNAME_AND_PHONE_NUMBER}`,
+                        ctx.session.messages.auth.types[
                             USERNAME_AND_PHONE_NUMBER
-                        ),
-                        Markup.button.callback(
-                            ctx.session.messages.actions.home,
-                            GREETING
-                        )
-                    ],
-                    {
-                        columns: 1
-                    }
-                )
+                        ]
+                    );
+
+            await ctx.sendMessage(
+                ctx.session.user
+                    ? ctx.session.messages.auth.description.user.replace(
+                          '%1',
+                          ctx.session.messages.auth.types[userVisibilityType]
+                      ) +
+                          noteAboutUsername +
+                          '\n\n' +
+                          generalQuestion
+                    : generalQuestion +
+                          ctx.session.messages.auth.description.guest +
+                          noteAboutUsername,
+                {
+                    ...Markup.inlineKeyboard(
+                        [
+                            Markup.button.callback(
+                                ctx.session.messages.auth.types.username,
+                                ONLY_USERNAME
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.auth.types.phone,
+                                ONLY_PHONE_NUMBER
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.auth.types.both,
+                                USERNAME_AND_PHONE_NUMBER
+                            ),
+                            Markup.button.callback(
+                                ctx.session.messages.actions.home,
+                                GREETING
+                            )
+                        ],
+                        {
+                            columns: 1
+                        }
+                    ),
+                    parse_mode: 'Markdown'
+                }
             );
 
             return ctx.wizard.next();
@@ -79,20 +118,36 @@ const Auth = new WizardScene(
                 return await setTimer(ctx, GREETING);
             }
 
-            let user;
-
             if (username && data === ONLY_USERNAME) {
-                user = await new User({
-                    telegramId: ctx.session.telegramId,
-                    username
-                });
+                try {
+                    if (ctx.session.user) {
+                        await User.findByIdAndUpdate(ctx.session.user._id, {
+                            username
+                        });
+                    } else {
+                        const user = await new User({
+                            telegramId: ctx.session.telegramId,
+                            username
+                        });
 
-                await user.save();
+                        await user.save();
+                    }
+                } catch (e) {
+                    await onUnknownError(ctx, e);
+
+                    return await setTimer(ctx, AUTH);
+                }
+
+                const successMessage = ctx.session.user
+                    ? ctx.session.messages.auth.success.user
+                    : ctx.session.messages.auth.success.guest;
+
                 await ctx.sendMessage(
-                    ctx.session.messages.auth.success.username.replace(
-                        '%1',
-                        username
-                    ),
+                    successMessage +
+                        ctx.session.messages.auth.success.username.replace(
+                            '%1',
+                            username
+                        ),
                     Markup.removeKeyboard()
                 );
 
@@ -115,7 +170,9 @@ const Auth = new WizardScene(
 
             return ctx.wizard.next();
         } catch (e) {
-            return await onUnknownError(ctx, e);
+            await onUnknownError(ctx, e);
+
+            return await setTimer(ctx, AUTH);
         }
     },
     async ctx => {
@@ -146,9 +203,13 @@ const Auth = new WizardScene(
         }
 
         try {
-            user = await new User(userData);
+            if (ctx.session.user) {
+                await User.findByIdAndUpdate(ctx.session.user._id, userData);
+            } else {
+                user = await new User(userData);
 
-            await user.save();
+                await user.save();
+            }
         } catch (e) {
             await ctx.sendMessage(
                 ctx.session.messages.errors.unknown,
@@ -158,16 +219,25 @@ const Auth = new WizardScene(
             return await setTimer(ctx, GREETING);
         }
 
+        const successMessage = ctx.session.user
+            ? ctx.session.messages.auth.success.user
+            : ctx.session.messages.auth.success.guest;
+
         try {
             if (ctx.scene.session.authType === ONLY_PHONE_NUMBER) {
                 await ctx.sendMessage(
-                    ctx.session.messages.auth.success.phone.replace('%1', phone)
+                    successMessage +
+                        ctx.session.messages.auth.success.phone.replace(
+                            '%1',
+                            phone
+                        )
                 );
             } else {
                 await ctx.sendMessage(
-                    ctx.session.messages.auth.success.both
-                        .replace('%1', username)
-                        .replace('%2', phone)
+                    successMessage +
+                        ctx.session.messages.auth.success.both
+                            .replace('%1', username)
+                            .replace('%2', phone)
                 );
             }
 

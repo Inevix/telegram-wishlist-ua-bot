@@ -16,7 +16,6 @@ const {
     STATS,
     DONATE
 } = require('../wizard/types');
-const removeKeyboard = require('../helpers/remove-keyboard');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 
 const stepHandler = getComplexStepHandler([
@@ -68,7 +67,7 @@ const Greeting = new WizardScene(
                         ...Markup.inlineKeyboard(
                             [
                                 Markup.button.callback(
-                                    ctx.session.messages.auth.title,
+                                    ctx.session.messages.auth.title.guest,
                                     AUTH
                                 ),
                                 Markup.button.callback(
@@ -126,6 +125,10 @@ const Greeting = new WizardScene(
                         Markup.button.callback(
                             ctx.session.messages.findList.title,
                             FIND_LIST
+                        ),
+                        Markup.button.callback(
+                            ctx.session.messages.auth.title.user,
+                            AUTH
                         ),
                         Markup.button.callback(
                             ctx.session.messages.privacy.title,
