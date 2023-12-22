@@ -119,6 +119,7 @@ const GiveList = new WizardScene(
                 let markup = await getWishMarkup(ctx, wish, false);
 
                 if (!markup) continue;
+
                 const user = await User.findById(wish.userId);
                 const userReference = user.username
                     ? `@${user.username}`

@@ -64,9 +64,16 @@ async function launchBot() {
             ) {
                 try {
                     const id = exception?.on?.payload?.chat_id;
-                    const dbUser = await User.findById(user._id);
 
                     if (!id) {
+                        continue;
+                    }
+
+                    const dbUser = await User.findOne({
+                        telegramId: id
+                    });
+
+                    if (!dbUser) {
                         continue;
                     }
 
@@ -74,6 +81,7 @@ async function launchBot() {
                         userId: dbUser._id
                     });
                     await User.findByIdAndRemove(dbUser._id);
+                    console.log('User has been deleted', dbUser);
 
                     continue;
                 } catch (e) {

@@ -17,6 +17,8 @@ const {
     DONATE
 } = require('../wizard/types');
 const { onUnknownError } = require('../helpers/on-unknown-error');
+const Give = require('../models/give');
+const { getTime } = require('../helpers/get-time');
 
 const stepHandler = getComplexStepHandler([
     PRIVACY,
@@ -155,8 +157,36 @@ const Greeting = new WizardScene(
             });
 
             return ctx.wizard.next();
-        } catch (e) {
-            return await onUnknownError(ctx, e);
+        } catch (exception) {
+            if (exception?.response?.error_code === 403) {
+                try {
+                    const id = exception?.on?.payload?.chat_id;
+
+                    if (!id) {
+                        return;
+                    }
+
+                    const dbUser = await User.findOne({
+                        telegramId: id
+                    });
+
+                    if (!dbUser) {
+                        return;
+                    }
+
+                    await Give.deleteMany({
+                        userId: dbUser._id
+                    });
+                    await User.findByIdAndRemove(dbUser._id);
+
+                    return console.log('User has been deleted', dbUser);
+                } catch (e) {
+                    console.log('Exception time:', getTime());
+                    console.error(e);
+                }
+            }
+
+            return await onUnknownError(ctx, exception);
         }
     },
     stepHandler
