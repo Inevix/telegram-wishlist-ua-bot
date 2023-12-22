@@ -10,6 +10,7 @@ const getWishMarkup = require('../helpers/wish-markup');
 const getMediaGroup = require('../helpers/media-group');
 const { resetTimer, setTimer } = require('../helpers/timer');
 const { onUnknownError } = require('../helpers/on-unknown-error');
+const { escapeMarkdownV2 } = require('../helpers/markdown-v2-escaper');
 const { GREETING, GIVE_LIST, FIND_LIST } = require('./types');
 const { REMOVE, CLEAN } = {
     REMOVE: 'remove_',
@@ -137,9 +138,12 @@ const GiveList = new WizardScene(
                 }
 
                 markup = markup.concat(
-                    ctx.session.messages.giveList.owner.replace(
-                        '%1',
-                        userReference
+                    escapeMarkdownV2(
+                        ctx.session.messages.giveList.owner.replace(
+                            '%1',
+                            userReference
+                        ),
+                        ['*']
                     )
                 );
 
