@@ -18,6 +18,10 @@ const userSchema = new Schema({
         sparse: true
     },
     language: String,
+    currency: {
+        type: String,
+        default: 'UAH'
+    },
     telegraphAccessToken: {
         type: String,
         default: ''

@@ -1,5 +1,3 @@
-const { Markup } = require('telegraf');
-
 module.exports = async ctx => {
     try {
         await ctx.editMessageReplyMarkup();

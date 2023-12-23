@@ -3,12 +3,11 @@ const fetch = require('node-fetch');
 const Wish = require('../models/wish');
 const { Markup } = require('telegraf');
 const { setTimer } = require('./timer');
-const { getTime } = require('./get-time');
+const { getTime, getDate } = require('./intl');
 const { WISHLIST } = require('../wizard/types');
 const getUsername = require('./username');
 const { onUnknownError } = require('./on-unknown-error');
 const { getCutText, textLimitTypes } = require('./cut-text');
-const getDate = require('./date');
 const User = require('../models/user');
 
 const createAccount = async (ctx, user) => {

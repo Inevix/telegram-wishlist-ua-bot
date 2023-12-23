@@ -1,5 +1,5 @@
 const { Markup } = require('telegraf');
-const { getTime } = require('./get-time');
+const { getTime } = require('./intl');
 
 const onUnknownError = async (ctx, exception) => {
     const errorTime = getTime();

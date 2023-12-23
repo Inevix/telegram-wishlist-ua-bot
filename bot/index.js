@@ -3,7 +3,7 @@ const bot = require('./bot');
 const User = require('./models/user');
 const Wish = require('./models/wish');
 const Give = require('./models/give');
-const { getTime } = require('./helpers/get-time');
+const { getTime } = require('./helpers/intl');
 const getChanges = require('./i18n/changelog');
 
 async function launchBot() {

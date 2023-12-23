@@ -5,7 +5,7 @@ const {
 } = require('telegraf');
 const wizard = require('./wizard');
 const { GREETING } = require('./wizard/types');
-const { getTime } = require('./helpers/get-time');
+const { getTime } = require('./helpers/intl');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const stage = new Stage([...wizard], {

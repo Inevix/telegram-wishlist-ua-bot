@@ -1,4 +1,4 @@
-const getDate = require('./date');
+const { getDate } = require('./intl');
 const { getCutText, textLimitTypes } = require('./cut-text');
 const { escapeMarkdownV2 } = require('./markdown-v2-escaper');
 

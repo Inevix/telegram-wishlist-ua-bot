@@ -19,7 +19,7 @@ const {
 } = require('../wizard/types');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 const Give = require('../models/give');
-const { getTime } = require('../helpers/get-time');
+const { getTime } = require('../helpers/intl');
 
 const stepHandler = getComplexStepHandler([
     PRIVACY,
