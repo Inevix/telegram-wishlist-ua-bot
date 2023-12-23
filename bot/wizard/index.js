@@ -11,5 +11,6 @@ module.exports = [
     require('./give-list'),
     require('./feedback'),
     require('./stats'),
-    require('./donate')
+    require('./donate'),
+    require('./payments')
 ];

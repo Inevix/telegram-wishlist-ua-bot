@@ -11,5 +11,6 @@ module.exports = {
     GIVE_LIST: 'give_list',
     FEEDBACK: 'feedback',
     STATS: 'stats',
-    DONATE: 'donate'
+    DONATE: 'donate',
+    PAYMENTS: 'payments'
 };

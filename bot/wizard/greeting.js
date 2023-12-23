@@ -14,7 +14,8 @@ const {
     FIND_LIST,
     FEEDBACK,
     STATS,
-    DONATE
+    DONATE,
+    PAYMENTS
 } = require('../wizard/types');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 const Give = require('../models/give');
@@ -28,7 +29,8 @@ const stepHandler = getComplexStepHandler([
     FIND_LIST,
     FEEDBACK,
     STATS,
-    DONATE
+    DONATE,
+    PAYMENTS
 ]);
 
 const Greeting = new WizardScene(
@@ -131,6 +133,12 @@ const Greeting = new WizardScene(
                         Markup.button.callback(
                             ctx.session.messages.auth.title.user,
                             AUTH
+                        ),
+                        Markup.button.callback(
+                            ctx.session.user.payments
+                                ? ctx.session.messages.payments.title.update
+                                : ctx.session.messages.payments.title.add,
+                            PAYMENTS
                         ),
                         Markup.button.callback(
                             ctx.session.messages.privacy.title,

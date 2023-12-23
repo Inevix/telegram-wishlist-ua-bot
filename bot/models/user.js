@@ -26,6 +26,10 @@ const userSchema = new Schema({
     noticed: {
         type: Boolean,
         default: false
+    },
+    payments: {
+        type: String,
+        default: ''
     }
 });
 

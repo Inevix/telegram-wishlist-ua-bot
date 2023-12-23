@@ -1,4 +1,5 @@
 const { JSDOM } = require('jsdom');
+const fetch = require('node-fetch');
 const Wish = require('../models/wish');
 const { Markup } = require('telegraf');
 const { setTimer } = require('./timer');
@@ -96,6 +97,18 @@ const getHtmlLayout = async (ctx, wishlist, debug) => {
 
         if (debug) {
             console.log(wishlist);
+        }
+
+        if (ctx.session.user.payments) {
+            result += `<blockquote>`;
+            result += markdownToHtml(
+                ctx.session.messages.share.payments.replace(
+                    '%1',
+                    ctx.session.user.payments
+                ),
+                false
+            );
+            result += `</blockquote>`;
         }
 
         for await (const wish of wishlist) {

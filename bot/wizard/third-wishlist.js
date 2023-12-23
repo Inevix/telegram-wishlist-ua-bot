@@ -296,6 +296,16 @@ const ThirdWishlist = new WizardScene(
                 }
             }
 
+            if (user.payments) {
+                await ctx.sendMessage(
+                    ctx.session.messages.findList.filled.payments.replace(
+                        '%1',
+                        user.payments
+                    ),
+                    Markup.removeKeyboard()
+                );
+            }
+
             await ctx.sendMessage(ctx.session.messages.findList.filled.after, {
                 ...Markup.inlineKeyboard(
                     [
