@@ -5,6 +5,7 @@ const {
 const User = require('../models/user');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
 const { onUnknownError } = require('../helpers/on-unknown-error');
+const trim = require('../helpers/trim');
 const { GREETING, PAYMENTS } = require('./types');
 const { resetTimer, setTimer } = require('../helpers/timer');
 const { REMOVE } = {
@@ -19,7 +20,7 @@ stepHandler.on('message', async ctx => {
 
         await resetTimer(ctx);
 
-        if (payments.trim().length < 5) {
+        if (trim(payments).length < 5) {
             await ctx.sendMessage(
                 ctx.session.messages.payments.edit.error,
                 Markup.removeKeyboard()
