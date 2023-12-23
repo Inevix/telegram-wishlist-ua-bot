@@ -23,6 +23,10 @@ module.exports = model(
                 type: Boolean,
                 default: false
             },
+            price: {
+                type: Number,
+                default: 0
+            },
             hidden: {
                 type: Boolean,
                 default: false

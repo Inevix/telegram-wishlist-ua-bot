@@ -14,15 +14,17 @@ const {
     textLimitTypes
 } = require('../../helpers/cut-text');
 const { WISHLIST_EDIT, WISHLIST, GREETING, WISHLIST_ADD } = require('../types');
-const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, VISIBILITY, BACK } = {
-    TITLE: 'title',
-    DESCRIPTION: 'description',
-    IMAGES: 'images',
-    LINK: 'link',
-    PRIORITY: 'priority',
-    VISIBILITY: 'visibility',
-    BACK: 'back'
-};
+const { TITLE, DESCRIPTION, IMAGES, LINK, PRIORITY, VISIBILITY, PRICE, BACK } =
+    {
+        TITLE: 'title',
+        DESCRIPTION: 'description',
+        IMAGES: 'images',
+        LINK: 'link',
+        PRIORITY: 'priority',
+        VISIBILITY: 'visibility',
+        PRICE: 'price',
+        BACK: 'back'
+    };
 
 const Edit = new WizardScene(
     WISHLIST_EDIT,
@@ -144,6 +146,14 @@ const Edit = new WizardScene(
                                     : ctx.session.messages.wishlist.edit.actions
                                           .hide,
                                 VISIBILITY
+                            ),
+                            Markup.button.callback(
+                                wish.price > 0
+                                    ? ctx.session.messages.wishlist.edit.actions
+                                          .updatePrice
+                                    : ctx.session.messages.wishlist.edit.actions
+                                          .addPrice,
+                                PRICE
                             ),
                             Markup.button.callback(
                                 ctx.session.messages.wishlist.add.title,
@@ -309,6 +319,29 @@ const Edit = new WizardScene(
                     );
 
                     return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
+            case PRICE:
+                try {
+                    if (ctx.scene.session.wish.price > 0) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes
+                                .updatePrice,
+                            Markup.keyboard([
+                                Markup.button.text(
+                                    ctx.session.messages.actions.remove
+                                )
+                            ])
+                        );
+                    } else {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.scenes.addPrice,
+                            Markup.removeKeyboard()
+                        );
+                    }
+
+                    return ctx.wizard.next();
                 } catch (e) {
                     return await onUnknownError(ctx, e);
                 }
@@ -548,6 +581,49 @@ const Edit = new WizardScene(
                                   .removeLink
                             : ctx.session.messages.wishlist.edit.success
                                   .updateLink) +
+                            ctx.session.messages.wishlist.edit.back,
+                        Markup.removeKeyboard()
+                    );
+
+                    return await setTimer(ctx, WISHLIST_EDIT);
+                } catch (e) {
+                    return await onUnknownError(ctx, e);
+                }
+            case PRICE:
+                try {
+                    if (
+                        !textAnswer ||
+                        !trim(textAnswer) ||
+                        !textAnswer.match(
+                            new RegExp(
+                                `\\d+|${ctx.session.messages.actions.remove}`
+                            )
+                        )
+                    ) {
+                        await ctx.sendMessage(
+                            ctx.session.messages.wishlist.edit.errors.price,
+                            Markup.removeKeyboard()
+                        );
+
+                        return await setTimer(ctx, WISHLIST_EDIT);
+                    }
+
+                    const price = parseInt(textAnswer.replace('-', ''));
+
+                    await ctx.scene.session.wish.updateOne({
+                        price:
+                            textAnswer ===
+                                ctx.session.messages.actions.remove ||
+                            price <= 0
+                                ? 0
+                                : price
+                    });
+                    await ctx.sendMessage(
+                        (textAnswer === ctx.session.messages.actions.remove
+                            ? ctx.session.messages.wishlist.edit.success
+                                  .removePrice
+                            : ctx.session.messages.wishlist.edit.success
+                                  .updatePrice) +
                             ctx.session.messages.wishlist.edit.back,
                         Markup.removeKeyboard()
                     );

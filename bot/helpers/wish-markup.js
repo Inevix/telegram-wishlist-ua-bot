@@ -1,5 +1,6 @@
 const { getDate } = require('./intl');
 const { getCutText, textLimitTypes } = require('./cut-text');
+const { getCurrency } = require('./intl');
 const { escapeMarkdownV2 } = require('./markdown-v2-escaper');
 
 module.exports = async (
@@ -34,8 +35,24 @@ module.exports = async (
                 ? escapeMarkdownV2(ctx.session.messages.markup.hidden, ['_'])
                 : '';
 
+        const price =
+            wish.price > 0
+                ? escapeMarkdownV2(
+                      ctx.session.messages.markup.price.replace(
+                          '%1',
+                          getCurrency(ctx, wish.price)
+                      ),
+                      ['*']
+                  )
+                : '';
+
         if (onlyTitleAndDate) {
-            return title + (editDate ? `\n${editDate}` : createdDate) + hidden;
+            return (
+                title +
+                price +
+                (editDate ? `\n${editDate}` : createdDate) +
+                hidden
+            );
         }
 
         let priority = '';
@@ -57,7 +74,15 @@ module.exports = async (
             );
         }
 
-        return title + priority + description + createdDate + editDate + hidden;
+        return (
+            title +
+            priority +
+            description +
+            price +
+            createdDate +
+            editDate +
+            hidden
+        );
     } catch (e) {
         throw e;
     }

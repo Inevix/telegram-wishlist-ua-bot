@@ -19,9 +19,7 @@ module.exports = {
     },
 
     getDate(ctx, date) {
-        const { lang } = ctx.session;
-
-        return new Intl.DateTimeFormat(`${lang}-UA`, {
+        return new Intl.DateTimeFormat(ctx.session.lang, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'

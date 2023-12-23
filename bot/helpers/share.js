@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const Wish = require('../models/wish');
 const { Markup } = require('telegraf');
 const { setTimer } = require('./timer');
-const { getTime, getDate } = require('./intl');
+const { getTime, getDate, getCurrency } = require('./intl');
 const { WISHLIST } = require('../wizard/types');
 const getUsername = require('./username');
 const { onUnknownError } = require('./on-unknown-error');
@@ -111,12 +111,29 @@ const getHtmlLayout = async (ctx, wishlist, debug) => {
         }
 
         for await (const wish of wishlist) {
-            const { title, description, link, priority, createdAt, updatedAt } =
-                wish;
+            const {
+                title,
+                price,
+                description,
+                link,
+                priority,
+                createdAt,
+                updatedAt
+            } = wish;
             const created = getDate(ctx, createdAt);
             const updated = getDate(ctx, updatedAt);
 
             result += `<h3>${getCutText(title)}</h3>`;
+
+            if (price > 0) {
+                result += `<p>${markdownToHtml(
+                    ctx.session.messages.markup.price.replace(
+                        '%1',
+                        getCurrency(ctx, price)
+                    ),
+                    true
+                )}</p>`;
+            }
 
             if (description) {
                 result += `<p>${markdownToHtml(
