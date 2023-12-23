@@ -7,6 +7,7 @@ const removeKeyboard = require('../helpers/remove-keyboard');
 const { setTimer } = require('../helpers/timer');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 const { GREETING, AUTH } = require('./types');
+const getChanges = require('../i18n/changelog');
 const { ONLY_USERNAME, ONLY_PHONE_NUMBER, USERNAME_AND_PHONE_NUMBER } = {
     ONLY_USERNAME: 'username',
     ONLY_PHONE_NUMBER: 'phone',
@@ -125,9 +126,14 @@ const Auth = new WizardScene(
                             username
                         });
                     } else {
+                        const changelog = getChanges();
+                        const latest = Object.keys(changelog)[0];
+
                         const user = await new User({
                             telegramId: ctx.session.telegramId,
-                            username
+                            username,
+                            version: latest,
+                            noticed: true
                         });
 
                         await user.save();
