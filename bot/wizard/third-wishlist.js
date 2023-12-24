@@ -246,13 +246,18 @@ const ThirdWishlist = new WizardScene(
                     'ctx.session.thirdWishlistFilter',
                     ctx.session.thirdWishlistFilter
                 );
-                if (ctx.session.thirdWishlistFilter >= 0) {
+                if (
+                    ctx.session.thirdWishlistFilter !== null &&
+                    ctx.session.thirdWishlistFilter >= 0
+                ) {
                     await ctx.sendMessage(
                         ctx.session.messages.findList.filtered,
                         Markup.inlineKeyboard(
                             [
                                 Markup.button.callback(
                                     `${ctx.session.messages.filters.title} ${
+                                        ctx.session?.thirdWishlistFilter !==
+                                            null &&
                                         ctx.session?.thirdWishlistFilter >= 0
                                             ? '🟢'
                                             : '🔴'
@@ -286,7 +291,8 @@ const ThirdWishlist = new WizardScene(
                     '%1',
                     ctx.session.thirdWishlist
                 ) +
-                    (ctx.session?.thirdWishlistFilter >= 0
+                    (ctx.session?.thirdWishlistFilter !== null &&
+                    ctx.session?.thirdWishlistFilter >= 0
                         ? ctx.session.messages.filters.applied.replace(
                               '%1',
                               getPriceFilterTitle(
@@ -393,6 +399,7 @@ const ThirdWishlist = new WizardScene(
                     [
                         Markup.button.callback(
                             `${ctx.session.messages.filters.title} ${
+                                ctx.session?.thirdWishlistFilter !== null &&
                                 ctx.session?.thirdWishlistFilter >= 0
                                     ? '🟢'
                                     : '🔴'

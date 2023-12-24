@@ -32,7 +32,7 @@ const filters = [
 const getFilters = () => filters;
 
 const getPriceFilter = (ctx, filter) => {
-    if (filter >= 0) {
+    if (filter !== null && filter >= 0) {
         const { from, to } = getFilters()[filter];
 
         return {
