@@ -608,7 +608,7 @@ const Edit = new WizardScene(
                         return await setTimer(ctx, WISHLIST_EDIT);
                     }
 
-                    const price = parseInt(textAnswer.replace('-', ''));
+                    const price = parseInt(textAnswer.replace(/\D/g, ''));
 
                     await ctx.scene.session.wish.updateOne({
                         price:
