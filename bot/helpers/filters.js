@@ -34,11 +34,13 @@ const getFilters = () => filters;
 const getPriceFilter = (ctx, filter) => {
     if (filter !== null && filter >= 0) {
         const { from, to } = getFilters()[filter];
+        const gte = from ? { $gte: from } : {};
+        const lte = to ? { $lte: to } : {};
 
         return {
             price: {
-                $gte: from,
-                $lte: to
+                ...gte,
+                ...lte
             }
         };
     }
