@@ -69,7 +69,7 @@ const Edit = new WizardScene(
 
         ctx.scene.session.wish = wish;
 
-        const markup = await getWishMarkup(ctx, wish, false, false, true);
+        const markup = await getWishMarkup(ctx, wish, true, false, true);
         const keyboard = wish.link
             ? Markup.inlineKeyboard([
                   Markup.button.url(
