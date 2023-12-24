@@ -34,6 +34,10 @@ const userSchema = new Schema({
     payments: {
         type: String,
         default: ''
+    },
+    wishlistFilter: {
+        type: Number,
+        default: null
     }
 });
 

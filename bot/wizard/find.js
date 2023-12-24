@@ -10,7 +10,16 @@ const { GREETING, FIND_LIST, THIRD_WISHLIST } = require('./types');
 const stepHandler = getComplexStepHandler([GREETING]);
 
 stepHandler.on('message', async ctx => {
-    ctx.session.thirdWishlist = ctx.update?.message?.text ?? '';
+    const thirdWishlist = ctx.update?.message?.text ?? '';
+
+    if (
+        ctx.session.thirdWishlist &&
+        ctx.session.thirdWishlist !== thirdWishlist
+    ) {
+        delete ctx.session.thirdWishlistFilter;
+    }
+
+    ctx.session.thirdWishlist = thirdWishlist;
 
     return await ctx.scene.enter(THIRD_WISHLIST);
 });

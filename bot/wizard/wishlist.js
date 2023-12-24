@@ -1,13 +1,21 @@
 const {
     Scenes: { WizardScene },
-    Markup
+    Markup,
+    Composer
 } = require('telegraf');
 const Wish = require('../models/wish');
 const Give = require('../models/give');
+const User = require('../models/user');
 const getComplexStepHandler = require('../helpers/complex-step-handler');
 const getWishMarkup = require('../helpers/wish-markup');
 const { onUnknownError } = require('../helpers/on-unknown-error');
 const { setTimer } = require('../helpers/timer');
+const {
+    getStepFilterHandler,
+    getPriceFilter,
+    getPriceFilterTitle
+} = require('../helpers/filters');
+const { getCurrency } = require('../helpers/intl');
 const share = require('../helpers/share');
 const {
     GREETING,
@@ -16,14 +24,17 @@ const {
     WISHLIST_EDIT,
     WISHLIST_REMOVE
 } = require('./types');
-const { EDIT, REMOVE, CLEAN, SHARE } = {
+const { EDIT, REMOVE, FILTER, FILTER_RESET, CLEAN, SHARE } = {
     EDIT: 'edit_',
     REMOVE: 'remove_',
+    FILTER: 'filter',
+    FILTER_RESET: 'filter_reset',
     CLEAN: 'clean',
     SHARE: 'share'
 };
 
 const stepHandler = getComplexStepHandler([GREETING, WISHLIST, WISHLIST_ADD]);
+const filtersHandler = new Composer();
 
 stepHandler.action(new RegExp(`${EDIT}`), async ctx => {
     ctx.session.wishToEdit = ctx.update.callback_query.data.replace(EDIT, '');
@@ -77,16 +88,57 @@ stepHandler.action(SHARE, async ctx => {
     await share(ctx);
 });
 
+getStepFilterHandler(stepHandler);
+
+filtersHandler.action(new RegExp(`${FILTER}_`), async ctx => {
+    try {
+        const action = ctx.update.callback_query.data;
+
+        if (action === FILTER_RESET) {
+            await ctx.session.user.updateOne({
+                wishlistFilter: null
+            });
+
+            ctx.session.user = await User.findById(ctx.session.user._id);
+
+            await ctx.sendMessage(
+                ctx.session.messages.filters.success.reset,
+                Markup.removeKeyboard()
+            );
+
+            return await setTimer(ctx, WISHLIST);
+        }
+
+        await ctx.session.user.updateOne({
+            wishlistFilter: parseInt(action.replace(`${FILTER}_`, ''))
+        });
+
+        ctx.session.user = await User.findById(ctx.session.user._id);
+
+        await ctx.sendMessage(
+            ctx.session.messages.filters.success.set,
+            Markup.removeKeyboard()
+        );
+
+        return await setTimer(ctx, WISHLIST);
+    } catch (e) {
+        return await onUnknownError(ctx, e);
+    }
+});
+
 const Wishlist = new WizardScene(
     WISHLIST,
     async ctx => {
         try {
-            const wishlist = await Wish.find({
+            const findFilters = {
                 userId: ctx.session.user._id,
                 removed: {
                     $ne: true
-                }
-            }).sort({
+                },
+                ...getPriceFilter(ctx, ctx.session.user.wishlistFilter)
+            };
+
+            const wishlist = await Wish.find(findFilters).sort({
                 priority: -1,
                 updatedAt: -1
             });
@@ -94,6 +146,12 @@ const Wishlist = new WizardScene(
                 Markup.button.callback(
                     ctx.session.messages.wishlist.add.title,
                     WISHLIST_ADD
+                ),
+                Markup.button.callback(
+                    `${ctx.session.messages.filters.title} ${
+                        ctx.session.user.wishlistFilter !== null ? '🟢' : '🔴'
+                    }`,
+                    FILTER
                 )
             ];
 
@@ -121,7 +179,9 @@ const Wishlist = new WizardScene(
 
             if (!wishlist.length) {
                 await ctx.sendMessage(
-                    ctx.session.messages.wishlist.empty,
+                    ctx.session.user.wishlistFilter !== null
+                        ? ctx.session.messages.wishlist.filtered
+                        : ctx.session.messages.wishlist.empty,
                     Markup.inlineKeyboard(buttons, {
                         columns: 1
                     })
@@ -131,7 +191,16 @@ const Wishlist = new WizardScene(
             }
 
             await ctx.replyWithMarkdown(
-                ctx.session.messages.wishlist.filled.before,
+                ctx.session.messages.wishlist.filled.before +
+                    (ctx.session.user.wishlistFilter !== null
+                        ? ctx.session.messages.filters.applied.replace(
+                              '%1',
+                              getPriceFilterTitle(
+                                  ctx,
+                                  ctx.session.user.wishlistFilter
+                              )
+                          )
+                        : ''),
                 Markup.removeKeyboard()
             );
 
@@ -171,7 +240,8 @@ const Wishlist = new WizardScene(
             return await onUnknownError(ctx, e);
         }
     },
-    stepHandler
+    stepHandler,
+    filtersHandler
 );
 
 module.exports = Wishlist;
