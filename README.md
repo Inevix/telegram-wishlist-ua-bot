@@ -1,5 +1,5 @@
 # Wishlist<br/>Лист бажань
-Telegram bot<br/>Телеграм бот
+Telegram bot<br/>Телеграм бот 
 <hr/>
 
 ## Prepare to use<br/>Підготуй до використання
